@@ -167,7 +167,7 @@ services:
       service: grafana
     build:
       args:
-        grafana_version: ${GRAFANA_VERSION:-9.1.2}
+        grafana_version: ${GRAFANA_VERSION:-10.0.0}
         grafana_image: ${GRAFANA_IMAGE:-grafana}
 ```
 
