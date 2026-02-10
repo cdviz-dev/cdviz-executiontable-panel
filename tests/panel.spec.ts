@@ -1,35 +1,56 @@
 import { test, expect } from '@grafana/plugin-e2e';
 
-test('should display "No data" in case panel data is empty', async ({
+test('should display table with pipeline execution data', async ({ gotoPanelEditPage, readProvisionedDashboard }) => {
+  const dashboard = await readProvisionedDashboard({ fileName: 'test-showcase.json' });
+  const panelEditPage = await gotoPanelEditPage({ dashboard, id: '3' });
+
+  // Check that the table is rendered
+  await expect(panelEditPage.panel.locator.getByRole('table')).toBeVisible();
+
+  // Check for expected column headers
+  await expect(panelEditPage.panel.locator.getByRole('columnheader', { name: /Name/i })).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByRole('columnheader', { name: /History/i })).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByRole('columnheader', { name: /Last Outcome/i })).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByRole('columnheader', { name: /Last Duration/i })).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByRole('columnheader', { name: /Total Runs/i })).toBeVisible();
+
+  // Check for pipeline names in the data
+  await expect(panelEditPage.panel.locator.getByText('build-main')).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByText('test-suite')).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByText('deploy-prod')).toBeVisible();
+});
+
+test('should display task execution data without queue column', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
 }) => {
-  const dashboard = await readProvisionedDashboard({ fileName: 'dashboard.json' });
-  const panelEditPage = await gotoPanelEditPage({ dashboard, id: '2' });
-  await expect(panelEditPage.panel.locator).toContainText('No data');
+  const dashboard = await readProvisionedDashboard({ fileName: 'test-showcase.json' });
+  const panelEditPage = await gotoPanelEditPage({ dashboard, id: '5' });
+
+  // Check that the table is rendered with task data
+  await expect(panelEditPage.panel.locator.getByRole('table')).toBeVisible();
+
+  // Check for task names
+  await expect(panelEditPage.panel.locator.getByText('lint-code')).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByText('compile-app')).toBeVisible();
+
+  // Queue column should not be visible (showQueueHistory is false for this panel)
+  await expect(panelEditPage.panel.locator.getByRole('columnheader', { name: /Last Queue/i })).not.toBeVisible();
 });
 
-test('should display circle when data is passed to the panel', async ({
-  panelEditPage,
-  readProvisionedDataSource,
-  page,
-}) => {
-  const ds = await readProvisionedDataSource({ fileName: 'datasources.yml' });
-  await panelEditPage.datasource.set(ds.name);
-  await panelEditPage.setVisualization('executiontable');
-  await expect(page.getByTestId('simple-panel-circle')).toBeVisible();
-});
-
-test('should display series counter when "Show series counter" option is enabled', async ({
+test('should display test suite data with test breakdown columns', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
-  page,
 }) => {
-  const dashboard = await readProvisionedDashboard({ fileName: 'dashboard.json' });
-  const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
-  const options = panelEditPage.getCustomOptions('executiontable');
-  const showSeriesCounter = options.getSwitch('Show series counter');
+  const dashboard = await readProvisionedDashboard({ fileName: 'test-showcase.json' });
+  const panelEditPage = await gotoPanelEditPage({ dashboard, id: '7' });
 
-  await showSeriesCounter.check();
-  await expect(page.getByTestId('simple-panel-series-counter')).toBeVisible();
+  // Check that test breakdown columns are visible
+  await expect(panelEditPage.panel.locator.getByRole('columnheader', { name: /Passed/i })).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByRole('columnheader', { name: /Failed/i })).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByRole('columnheader', { name: /Skipped/i })).toBeVisible();
+
+  // Check for test suite names
+  await expect(panelEditPage.panel.locator.getByText('unit-tests')).toBeVisible();
+  await expect(panelEditPage.panel.locator.getByText('integration-tests')).toBeVisible();
 });
