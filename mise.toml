@@ -85,3 +85,53 @@ depends = ["build"]
 [tasks.ci]
 description = "full CI pipeline: install, check, test, build"
 depends = ["install:deps", "check", "test", "build"]
+
+[tasks.version]
+description = "set version in package.json, plugin.json, create git tag and push"
+usage = """
+flag "--version <version>" help="Version number to set (e.g., 1.0.3)"
+"""
+run = [
+  """
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  echo "Setting version to $usage_version"
+
+  # Update package.json
+  echo "Updating package.json..."
+  yarn node -e "
+    const fs = require('fs');
+    const pkg = require('./package.json');
+    pkg.version = '$usage_version';
+    fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\\n');
+  "
+
+  # Update src/plugin.json
+  echo "Updating src/plugin.json..."
+  yarn node -e "
+    const fs = require('fs');
+    const plugin = require('./src/plugin.json');
+    plugin.info.version = '$usage_version';
+    fs.writeFileSync('./src/plugin.json', JSON.stringify(plugin, null, 2) + '\\n');
+  "
+
+  echo "Version updated to $usage_version in package.json and src/plugin.json"
+
+  # Commit the version changes
+  echo "Committing version changes..."
+  git add package.json src/plugin.json
+  git commit -m "chore: bump version to $usage_version"
+
+  # Create git tag
+  TAG="v$usage_version"
+  echo "Creating git tag $TAG..."
+  git tag -a "$TAG" -m "$usage_version"
+
+  echo "Pushing to origin with tags..."
+  git push origin main --follow-tags
+
+  echo "✓ Version $usage_version released and pushed!"
+  """,
+]
+wait_for = ["install:deps"]
