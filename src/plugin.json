@@ -11,7 +11,17 @@
     },
     "keywords": ["table", "execution", "cdevents", "pipeline", "ci/cd"],
     "version": "1.0.0",
-    "updated": "2026-02-07"
+    "updated": "2026-02-07",
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "screenshots": [
+      {
+        "name": "Execution Table with History Visualization",
+        "path": "docs/Screenshot-20260210_1737.png"
+      }
+    ]
   },
   "dependencies": {
     "grafanaDependency": ">=9.0.0",

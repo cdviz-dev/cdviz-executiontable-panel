@@ -1,117 +1,235 @@
-# Grafana panel plugin template
+# CDviz Execution Table Panel
 
-This template is a starting point for building a panel plugin for Grafana.
+[![Grafana Version](https://img.shields.io/badge/Grafana-%3E%3D9.0.0-orange?logo=grafana)](https://grafana.com)
+[![License](https://img.shields.io/github/license/cdviz-dev/cdviz-executiontable-panel)](https://github.com/cdviz-dev/cdviz-executiontable-panel/blob/main/LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/cdviz-dev/cdviz-executiontable-panel)](https://github.com/cdviz-dev/cdviz-executiontable-panel/releases)
+[![CI](https://github.com/cdviz-dev/cdviz-executiontable-panel/actions/workflows/ci.yml/badge.svg)](https://github.com/cdviz-dev/cdviz-executiontable-panel/actions/workflows/ci.yml)
 
-## What are Grafana panel plugins?
+A Grafana panel plugin that displays execution data (pipelines, tasks, tests, etc.) in an interactive table with built-in bar chart history visualization. Perfect for monitoring CI/CD pipelines, test executions, and other time-series execution data using [CDEvents](https://cdevents.dev/).
 
-Panel plugins allow you to add new types of visualizations to your dashboard, such as maps, clocks, pie charts, lists, and more.
+![CDviz Execution Table Panel](src/img/screenshot-1.png)
 
-Use panel plugins when you want to do things like visualize data returned by data source queries, navigate between dashboards, or control external systems (such as smart home devices).
+## Features
+
+- **Interactive execution table**: Display execution summaries with key metrics like success rate, duration, and last run status
+- **Visual history bars**: Built-in sparkline-style bar charts showing execution history (success/failure/other states) over time
+- **Customizable visualization**: Configure bar height, width, gap, and number of history items displayed
+- **Duration percentiles**: Show configurable percentile values (P50, P80, P95) for duration analysis
+- **Queue history**: Optional column to display queue duration patterns
+- **CDEvents compatibility**: Designed to work seamlessly with CDEvents data from CI/CD pipelines
+- **Responsive design**: Adapts to different panel sizes and dashboard layouts
+
+## Requirements
+
+- **Grafana**: Version 9.0.0 or higher
+- **Data source**: Any Grafana data source that returns execution/pipeline data with the following fields:
+  - Name/identifier
+  - Status/result (success, failure, etc.)
+  - Duration
+  - Timestamp
+  - Optional: Queue duration
 
 ## Getting started
 
-### Frontend
+### Installation
 
-1. Install dependencies
+#### From GitHub Releases
 
-   ```bash
-   yarn install
-   ```
+1. Download the latest release from the [releases page](https://github.com/cdviz-dev/cdviz-executiontable-panel/releases)
+2. Extract the archive into your Grafana plugins directory:
+   - Default path: `/var/lib/grafana/plugins`
+   - Or custom path specified in `grafana.ini` under `[paths] plugins`
+3. Restart Grafana
+4. Verify the plugin is installed by checking Grafana's plugin list
 
-2. Build plugin in development mode and run in watch mode
+#### From Source
 
-   ```bash
-   yarn run dev
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/cdviz-dev/cdviz-executiontable-panel.git
+cd cdviz-executiontable-panel
 
-3. Build plugin in production mode
+# Install dependencies
+yarn install
 
-   ```bash
-   yarn run build
-   ```
+# Build the plugin
+yarn build
 
-4. Run the tests (using Jest)
+# Create a symbolic link to your Grafana plugins directory
+ln -s $(pwd) /var/lib/grafana/plugins/cdviz-executiontable-panel
 
-   ```bash
-   # Runs the tests and watches for changes, requires git init first
-   yarn run test
+# Restart Grafana
+sudo systemctl restart grafana-server
+```
 
-   # Exits after running all the tests
-   yarn run test:ci
-   ```
+### Configuration
 
-5. Spin up a Grafana instance and run the plugin inside it (using Docker)
+1. **Add the panel**: In your Grafana dashboard, add a new panel and select "CDviz Execution Table" as the visualization type
 
-   ```bash
-   yarn run server
-   ```
+2. **Configure your data source**: Query your execution data ensuring you have the necessary fields:
+   - Execution name/identifier
+   - Status (success, failure, etc.)
+   - Duration values
+   - Timestamps
 
-6. Run the E2E tests (using Playwright)
+3. **Customize the visualization**: Use the panel options to adjust:
+   - **Max history items**: Number of execution bars to display (5-50, default: 20)
+   - **Show queue history**: Toggle queue duration history column (default: true)
+   - **Bar height**: Height of each history bar in pixels (10-40px, default: 20px)
+   - **Bar width**: Width of each history bar in pixels (2-30px, default: 8px)
+   - **Bar gap**: Spacing between bars in pixels (0-10px, default: 2px)
+   - **Duration percentile**: Percentile value for duration display (1-99, default: 80 for P80)
 
-   ```bash
-   # Spins up a Grafana instance first that we tests against
-   yarn run server
+## Usage
 
-   # If you wish to start a certain Grafana version. If not specified will use latest by default
-   GRAFANA_VERSION=11.3.0 yarn run server
+### Understanding the table columns
 
-   # Starts the tests
-   yarn run e2e
-   ```
+- **Name**: Execution identifier (pipeline, test, task name)
+- **Summary**: Visual success/failure counts for recent executions
+- **Last Duration**: Duration of the most recent execution
+- **Last Result**: Status of the most recent execution (success/failure/etc.)
+- **Last Run**: Timestamp of the most recent execution
+- **P80 Duration** (or your configured percentile): Duration at the specified percentile
+- **Total Runs**: Total number of recorded executions
+- **History Bar**: Visual representation of execution history with color-coded status bars
 
-7. Run the linter
+### Color coding
 
-   ```bash
-   yarn run lint
+- **Green**: Successful execution
+- **Red**: Failed execution
+- **Yellow/Orange**: Other states (queued, running, etc.)
 
-   # or
+## Development
 
-   yarn run lint:fix
-   ```
+### Prerequisites
 
-# Distributing your plugin
+- Node.js 22 or higher
+- Yarn package manager
+- [mise](https://mise.jdx.dev/) (optional, for task automation)
 
-When distributing a Grafana plugin either within the community or privately the plugin must be signed so the Grafana application can verify its authenticity. This can be done with the `@grafana/sign-plugin` package.
+### Building the plugin
 
-_Note: It's not necessary to sign a plugin during development. The docker development environment that is scaffolded with `@grafana/create-plugin` caters for running the plugin without a signature._
+```bash
+# Install dependencies
+yarn install
 
-## Initial steps
+# Build in development mode with watch
+yarn dev
 
-Before signing a plugin please read the Grafana [plugin publishing and signing criteria](https://grafana.com/legal/plugins/#plugin-publishing-and-signing-criteria) documentation carefully.
+# Build for production
+yarn build
 
-`@grafana/create-plugin` has added the necessary commands and workflows to make signing and distributing a plugin via the grafana plugins catalog as straightforward as possible.
+# Run tests
+yarn test:ci
 
-Before signing a plugin for the first time please consult the Grafana [plugin signature levels](https://grafana.com/legal/plugins/#what-are-the-different-classifications-of-plugins) documentation to understand the differences between the types of signature level.
+# Run linter
+yarn lint
 
-1. Create a [Grafana Cloud account](https://grafana.com/signup).
-2. Make sure that the first part of the plugin ID matches the slug of your Grafana Cloud account.
-   - _You can find the plugin ID in the `plugin.json` file inside your plugin directory. For example, if your account slug is `acmecorp`, you need to prefix the plugin ID with `acmecorp-`._
-3. Create a Grafana Cloud API key with the `PluginPublisher` role.
-4. Keep a record of this API key as it will be required for signing a plugin
+# Fix linting issues
+yarn lint:fix
+```
 
-## Signing a plugin
+### Using mise tasks
 
-### Using Github actions release workflow
+This project includes mise tasks for common operations:
 
-If the plugin is using the github actions supplied with `@grafana/create-plugin` signing a plugin is included out of the box. The [release workflow](./.github/workflows/release.yml) can prepare everything to make submitting your plugin to Grafana as easy as possible. Before being able to sign the plugin however a secret needs adding to the Github repository.
+```bash
+# Install dependencies
+mise run install:deps
 
-1. Please navigate to "settings > secrets > actions" within your repo to create secrets.
-2. Click "New repository secret"
-3. Name the secret "GRAFANA_API_KEY"
-4. Paste your Grafana Cloud API key in the Secret field
-5. Click "Add secret"
+# Run type checking
+mise run typecheck
 
-#### Push a version tag
+# Run linter
+mise run lint
 
-To trigger the workflow we need to push a version tag to github. This can be achieved with the following steps:
+# Run tests
+mise run test
 
-1. Run `npm version <major|minor|patch>`
-2. Run `git push origin main --follow-tags`
+# Build for production
+mise run build
+
+# Full CI pipeline (install, check, test, build)
+mise run ci
+
+# Package plugin as zip
+mise run package
+```
+
+### Running the plugin locally
+
+```bash
+# Start Grafana dev server with Docker
+yarn server
+
+# The plugin will be available at http://localhost:3000
+# Default credentials: admin/admin
+```
+
+### Running E2E tests
+
+```bash
+# Start Grafana server
+yarn server
+
+# In another terminal, run E2E tests
+yarn e2e
+
+# Test against a specific Grafana version
+GRAFANA_VERSION=11.3.0 yarn server
+```
+
+## Contributing
+
+We welcome contributions! Here's how you can help:
+
+### Reporting bugs
+
+If you find a bug, please [open an issue](https://github.com/cdviz-dev/cdviz-executiontable-panel/issues/new) with:
+
+- A clear description of the issue
+- Steps to reproduce
+- Expected vs actual behavior
+- Grafana version and plugin version
+- Screenshots if applicable
+
+### Feature requests
+
+Have an idea for a new feature? [Open an issue](https://github.com/cdviz-dev/cdviz-executiontable-panel/issues/new) with:
+
+- A clear description of the feature
+- Use cases and benefits
+- Any relevant examples or mockups
+
+### Pull requests
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests and linting (`mise run ci`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to your fork (`git push origin feature/amazing-feature`)
+7. Open a pull request
+
+Please ensure your code:
+
+- Passes all tests and linting checks
+- Follows the existing code style
+- Includes tests for new functionality
+- Updates documentation as needed
+
+## License
+
+This plugin is licensed under the [Apache License 2.0](https://github.com/cdviz-dev/cdviz-executiontable-panel/blob/main/LICENSE).
 
 ## Learn more
 
-Below you can find source code for existing app plugins and other related documentation.
+- [CDviz Project](https://cdviz.dev) - Learn more about CDviz and CDEvents
+- [CDEvents Specification](https://cdevents.dev) - Open specification for CI/CD events
+- [Grafana Panel Plugin Documentation](https://grafana.com/developers/plugin-tools/introduction/panel-plugins) - Official guide to building panel plugins
+- [Grafana Plugin Development](https://grafana.com/developers/plugin-tools) - Tools and resources for plugin development
+- [Plugin Signing](https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin) - How to sign and distribute your plugin
 
-- [Basic panel plugin example](https://github.com/grafana/grafana-plugin-examples/tree/master/examples/panel-basic#readme)
-- [`plugin.json` documentation](https://grafana.com/developers/plugin-tools/reference/plugin-json)
-- [How to sign a plugin?](https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin)
+---
+
+**Built with ❤️ by the [CDviz Team](https://cdviz.dev)**
