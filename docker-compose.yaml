@@ -1,0 +1,8 @@
+services:
+  grafana:
+    extends:
+      file: .config/docker-compose-base.yaml
+      service: grafana
+    environment:
+      # Install Infinity datasource plugin for static JSON data
+      GF_INSTALL_PLUGINS: yesoreyeram-infinity-datasource

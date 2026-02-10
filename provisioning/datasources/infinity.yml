@@ -1,0 +1,12 @@
+apiVersion: 1
+
+datasources:
+  - name: CDviz Test Data
+    type: yesoreyeram-infinity-datasource
+    uid: cdviz-test-data
+    access: proxy
+    isDefault: true
+    jsonData:
+      url_options:
+        method: GET
+    version: 1

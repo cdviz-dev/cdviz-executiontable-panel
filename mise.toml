@@ -1,0 +1,87 @@
+[tools]
+"bun" = "latest"
+
+[tasks."install:deps"]
+description = "install npm dependencies"
+run = "bun install"
+
+[tasks.typecheck]
+description = "run TypeScript type checking"
+run = "bun run typecheck"
+wait_for = [":install:deps"]
+
+[tasks.lint]
+description = "lint code with eslint"
+run = "bun run lint"
+wait_for = [":install:deps"]
+
+[tasks."lint:fix"]
+description = "fix lint issues and format code"
+run = "bun run lint:fix"
+wait_for = [":install:deps"]
+
+[tasks.check]
+description = "typecheck + lint"
+depends = [":typecheck", ":lint"]
+
+[tasks.test]
+description = "run unit tests"
+run = "bun run test:ci"
+wait_for = [":install:deps"]
+
+[tasks.build]
+description = "build plugin for production"
+run = "bun run build"
+sources = ["src/**", "package.json", "tsconfig.json"]
+outputs = ["dist/*"]
+wait_for = [":install:deps"]
+
+[tasks.dev]
+description = "start webpack in watch mode + grafana dev server"
+run = [
+  "docker compose up -d",
+  "bun run dev",
+]
+wait_for = [":install:deps"]
+
+[tasks."dev:server"]
+description = "start only the grafana dev server (docker compose)"
+run = "docker compose up"
+wait_for = [":install:deps"]
+
+[tasks."dev:server:stop"]
+description = "stop the grafana dev server"
+run = "docker compose down"
+
+[tasks."dev:server:restart"]
+description = "restart the grafana dev server"
+run = "docker compose restart grafana"
+
+[tasks.e2e]
+description = "run end-to-end tests with Playwright"
+run = "bun run e2e"
+wait_for = [":install:deps"]
+
+[tasks.sign]
+description = "sign plugin for distribution"
+run = "bun run sign"
+wait_for = [":build"]
+
+[tasks.package]
+description = "build and package plugin as zip for distribution"
+run = [
+  """
+  #!/usr/bin/env bash
+  set -euo pipefail
+  plugin_id=$(bun -e "console.log(require('./src/plugin.json').id)")
+  dist_dir="dist"
+  out="${plugin_id}-$(bun -e "console.log(require('./package.json').version)").zip"
+  cd "$dist_dir" && zip -r "../$out" . && cd ..
+  echo "Packaged: $out"
+  """,
+]
+depends = [":build"]
+
+[tasks.ci]
+description = "full CI pipeline: install, check, test, build"
+depends = [":install:deps", ":check", ":test", ":build"]
