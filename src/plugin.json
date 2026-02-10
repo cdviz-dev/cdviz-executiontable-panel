@@ -16,7 +16,7 @@
       "pipeline",
       "ci/cd"
     ],
-    "version": "1.0.3",
+    "version": "1.0.4",
     "updated": "2026-02-07",
     "logos": {
       "small": "img/logo.svg",
