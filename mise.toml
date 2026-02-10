@@ -1,23 +1,23 @@
 [tools]
-"bun" = "latest"
+"yarn" = "latest"
 
 [tasks."install:deps"]
 description = "install npm dependencies"
-run = "bun install"
+run = "yarn install"
 
 [tasks.typecheck]
 description = "run TypeScript type checking"
-run = "bun run typecheck"
+run = "yarn run typecheck"
 wait_for = ["install:deps"]
 
 [tasks.lint]
 description = "lint code with eslint"
-run = "bun run lint"
+run = "yarn run lint"
 wait_for = ["install:deps"]
 
 [tasks."lint:fix"]
 description = "fix lint issues and format code"
-run = "bun run lint:fix"
+run = "yarn run lint:fix"
 wait_for = ["install:deps"]
 
 [tasks.check]
@@ -26,12 +26,12 @@ depends = ["typecheck", "lint"]
 
 [tasks.test]
 description = "run unit tests"
-run = "bun run test:ci"
+run = "yarn run test:ci"
 wait_for = ["install:deps"]
 
 [tasks.build]
 description = "build plugin for production"
-run = "bun run build"
+run = "yarn run build"
 sources = ["src/**", "package.json", "tsconfig.json"]
 outputs = ["dist/*"]
 wait_for = ["install:deps"]
@@ -40,7 +40,7 @@ wait_for = ["install:deps"]
 description = "start webpack in watch mode + grafana dev server"
 run = [
   "docker compose up -d",
-  "bun run dev",
+  "yarn run dev",
 ]
 wait_for = ["install:deps"]
 
@@ -59,12 +59,12 @@ run = "docker compose restart grafana"
 
 [tasks.e2e]
 description = "run end-to-end tests with Playwright"
-run = "bun run e2e"
+run = "yarn run e2e"
 wait_for = ["install:deps"]
 
 [tasks.sign]
 description = "sign plugin for distribution"
-run = "bun run sign"
+run = "yarn run sign"
 wait_for = ["build"]
 
 [tasks.package]
@@ -73,9 +73,9 @@ run = [
   """
   #!/usr/bin/env bash
   set -euo pipefail
-  plugin_id=$(bun -e "console.log(require('./src/plugin.json').id)")
+  plugin_id=$(yarn node -e "console.log(require('./src/plugin.json').id)")
   dist_dir="dist"
-  out="${plugin_id}-$(bun -e "console.log(require('./package.json').version)").zip"
+  out="${plugin_id}-$(yarn node -e "console.log(require('./package.json').version)").zip"
   cd "$dist_dir" && zip -r "../$out" . && cd ..
   echo "Packaged: $out"
   """,
