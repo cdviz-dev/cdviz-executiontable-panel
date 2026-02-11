@@ -9,13 +9,7 @@
       "name": "CDviz Team",
       "url": "https://cdviz.dev"
     },
-    "keywords": [
-      "table",
-      "execution",
-      "cdevents",
-      "pipeline",
-      "ci/cd"
-    ],
+    "keywords": ["table", "execution", "cdevents", "pipeline", "ci/cd"],
     "version": "1.0.6",
     "updated": "2026-02-11",
     "logos": {
@@ -31,7 +25,7 @@
     "links": [
       {
         "name": "sponsorship",
-        "url": " https://github.com/sponsors/cdviz-dev"
+        "url": "https://github.com/sponsors/cdviz-dev"
       }
     ]
   },
