@@ -9,8 +9,14 @@
       "name": "CDviz Team",
       "url": "https://cdviz.dev"
     },
-    "keywords": ["table", "execution", "cdevents", "pipeline", "ci/cd"],
-    "version": "1.0.4",
+    "keywords": [
+      "table",
+      "execution",
+      "cdevents",
+      "pipeline",
+      "ci/cd"
+    ],
+    "version": "1.0.5",
     "updated": "2026-02-11",
     "logos": {
       "small": "img/logo.svg",
