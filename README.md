@@ -33,6 +33,8 @@ A Grafana panel plugin that displays execution data (pipelines, tasks, tests, et
 
 ### Installation
 
+All methods listed at [Install a plugin | Grafana documentation](https://grafana.com/docs/grafana/latest/administration/plugin-management/plugin-install/)
+
 #### From GitHub Releases
 
 1. Download the latest release from the [releases page](https://github.com/cdviz-dev/cdviz-executiontable-panel/releases)

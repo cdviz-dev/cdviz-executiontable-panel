@@ -4,20 +4,14 @@
   "name": "CDviz Execution Table",
   "id": "cdviz-executiontable-panel",
   "info": {
-    "description": "Interactive execution table with bar chart history visualization for CDEvents data",
+    "description": "Table with bar chart history visualization for executions (pipeline, test, CDEvents) data",
     "author": {
       "name": "CDviz Team",
       "url": "https://cdviz.dev"
     },
-    "keywords": [
-      "table",
-      "execution",
-      "cdevents",
-      "pipeline",
-      "ci/cd"
-    ],
+    "keywords": ["table", "execution", "cdevents", "pipeline", "ci/cd"],
     "version": "1.0.4",
-    "updated": "2026-02-07",
+    "updated": "2026-02-11",
     "logos": {
       "small": "img/logo.svg",
       "large": "img/logo.svg"
@@ -26,6 +20,12 @@
       {
         "name": "Execution Table with History Visualization",
         "path": "img/screenshot-1.png"
+      }
+    ],
+    "links": [
+      {
+        "name": "sponsorship",
+        "url": " https://github.com/sponsors/cdviz-dev"
       }
     ]
   },
