@@ -5,19 +5,35 @@ import { ExecutionTableOptions, ExecutionRow, getOutcomeColor } from '../types';
 import { HistoryBarChart } from './HistoryBarChart';
 
 // Helper function to parse array fields that might come as strings
+// Supports both JSON array syntax [...] and SQL array syntax {...}
 const parseArray = (value: any): any[] => {
   if (Array.isArray(value)) {
     return value;
   }
   if (typeof value === 'string') {
     try {
-      const parsed = JSON.parse(value);
+      let stringValue = value.trim();
+      // Convert SQL array syntax {a,b,c} to JSON array syntax [a,b,c]
+      if (stringValue.startsWith('{') && stringValue.endsWith('}')) {
+        stringValue = '[' + stringValue.slice(1, -1) + ']';
+      }
+      const parsed = JSON.parse(stringValue);
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
   }
   return [];
+};
+
+// Helper function to sanitize numeric arrays by converting null/NULL to 0
+const sanitizeNumericArray = (arr: any[]): number[] => {
+  return arr.map((val) => {
+    if (val === null || val === 'NULL' || val === 'null') {
+      return 0;
+    }
+    return typeof val === 'number' ? val : parseFloat(val) || 0;
+  });
 };
 
 type SortColumn =
@@ -84,13 +100,15 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({ da
     for (let i = 0; i < rowCount; i++) {
       result.push({
         Name: nameField.values[i],
-        'Run History (s)': parseArray(runHistoryField.values[i]),
+        'Run History (s)': sanitizeNumericArray(parseArray(runHistoryField.values[i])),
         'Outcome History': parseArray(outcomeHistoryField?.values[i]),
         'Run IDs': parseArray(runIdsField?.values[i]),
         URLs: parseArray(urlsField?.values[i]),
         'Started Times': parseArray(startedTimesField?.values[i]),
         'Completion Times': parseArray(completionTimesField?.values[i]),
-        'Queue History (s)': queueHistoryField?.values[i] ? parseArray(queueHistoryField.values[i]) : undefined,
+        'Queue History (s)': queueHistoryField?.values[i]
+          ? sanitizeNumericArray(parseArray(queueHistoryField.values[i]))
+          : undefined,
         'Last Outcome': lastOutcomeField?.values[i] || 'unknown',
         'Last Duration (s)': lastDurationField?.values[i] || 0,
         'Last Queue (s)': lastQueueField?.values[i],

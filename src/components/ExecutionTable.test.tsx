@@ -318,4 +318,177 @@ describe('ExecutionTable', () => {
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
   });
+
+  it('should parse SQL array syntax with curly braces', () => {
+    const props = createMockPanelProps([
+      {
+        name: 'Name',
+        type: FieldType.string,
+        values: ['build-main'],
+      },
+      {
+        name: 'Run History (s)',
+        type: FieldType.other,
+        values: ['{45.2,43.1,47.8}'], // SQL array syntax
+      },
+      {
+        name: 'Outcome History',
+        type: FieldType.other,
+        values: ['{success,success,failure}'], // SQL array syntax
+      },
+      {
+        name: 'Run IDs',
+        type: FieldType.other,
+        values: ['{run-1,run-2,run-3}'], // SQL array syntax
+      },
+      {
+        name: 'URLs',
+        type: FieldType.other,
+        values: ['{http://example.com/1,http://example.com/2,http://example.com/3}'], // SQL array syntax
+      },
+      {
+        name: 'Last Outcome',
+        type: FieldType.string,
+        values: ['success'],
+      },
+      {
+        name: 'Last Duration (s)',
+        type: FieldType.number,
+        values: [45.2],
+      },
+      {
+        name: 'P80 Duration (s)',
+        type: FieldType.number,
+        values: [47.1],
+      },
+      {
+        name: 'Total Runs',
+        type: FieldType.number,
+        values: [234],
+      },
+    ]);
+
+    render(<ExecutionTable {...props} />);
+
+    expect(screen.getByText('build-main')).toBeInTheDocument();
+    expect(screen.getByText('234')).toBeInTheDocument();
+  });
+
+  it('should handle null values in numeric arrays by converting to zero', () => {
+    const props = createMockPanelProps([
+      {
+        name: 'Name',
+        type: FieldType.string,
+        values: ['build-with-nulls'],
+      },
+      {
+        name: 'Run History (s)',
+        type: FieldType.other,
+        values: ['[45.2,null,47.8]'], // JSON with null
+      },
+      {
+        name: 'Outcome History',
+        type: FieldType.other,
+        values: [['success', 'success', 'failure']],
+      },
+      {
+        name: 'Run IDs',
+        type: FieldType.other,
+        values: [['run-1', 'run-2', 'run-3']],
+      },
+      {
+        name: 'URLs',
+        type: FieldType.other,
+        values: [['http://example.com/1', 'http://example.com/2', 'http://example.com/3']],
+      },
+      {
+        name: 'Last Outcome',
+        type: FieldType.string,
+        values: ['success'],
+      },
+      {
+        name: 'Last Duration (s)',
+        type: FieldType.number,
+        values: [45.2],
+      },
+      {
+        name: 'P80 Duration (s)',
+        type: FieldType.number,
+        values: [47.1],
+      },
+      {
+        name: 'Total Runs',
+        type: FieldType.number,
+        values: [234],
+      },
+    ]);
+
+    render(<ExecutionTable {...props} />);
+
+    expect(screen.getByText('build-with-nulls')).toBeInTheDocument();
+  });
+
+  it('should handle SQL array syntax with NULL values in numeric arrays', () => {
+    const props = createMockPanelProps([
+      {
+        name: 'Name',
+        type: FieldType.string,
+        values: ['build-sql-nulls'],
+      },
+      {
+        name: 'Run History (s)',
+        type: FieldType.other,
+        values: ['{45.2,NULL,47.8}'], // SQL array with NULL
+      },
+      {
+        name: 'Outcome History',
+        type: FieldType.other,
+        values: ['{success,success,failure}'],
+      },
+      {
+        name: 'Run IDs',
+        type: FieldType.other,
+        values: ['{run-1,run-2,run-3}'],
+      },
+      {
+        name: 'URLs',
+        type: FieldType.other,
+        values: ['{http://example.com/1,http://example.com/2,http://example.com/3}'],
+      },
+      {
+        name: 'Queue History (s)',
+        type: FieldType.other,
+        values: ['{2.3,null,1.8}'], // SQL array with null (lowercase)
+      },
+      {
+        name: 'Last Outcome',
+        type: FieldType.string,
+        values: ['success'],
+      },
+      {
+        name: 'Last Duration (s)',
+        type: FieldType.number,
+        values: [45.2],
+      },
+      {
+        name: 'Last Queue (s)',
+        type: FieldType.number,
+        values: [2.3],
+      },
+      {
+        name: 'P80 Duration (s)',
+        type: FieldType.number,
+        values: [47.1],
+      },
+      {
+        name: 'Total Runs',
+        type: FieldType.number,
+        values: [234],
+      },
+    ]);
+
+    render(<ExecutionTable {...props} />);
+
+    expect(screen.getByText('build-sql-nulls')).toBeInTheDocument();
+  });
 });
