@@ -21,18 +21,18 @@ export interface ExecutionTableOptions {
  */
 export interface ExecutionRow {
   Name: string;
-  'Run History (s)': number[];
-  'Outcome History': string[];
-  'Run IDs': string[];
+  "Run History (s)": number[];
+  "Outcome History": string[];
+  "Run IDs": string[];
   URLs: string[];
-  'Started Times': string[];
-  'Completion Times': string[];
-  'Queue History (s)'?: number[];
-  'Last Outcome': string;
-  'Last Duration (s)': number;
-  'Last Queue (s)'?: number;
-  'P80 Duration (s)': number;
-  'Total Runs': number;
+  "Started Times": string[];
+  "Completion Times": string[];
+  "Queue History (s)"?: number[];
+  "Last Outcome": string;
+  "Last Duration (s)": number;
+  "Last Queue (s)"?: number;
+  "P80 Duration (s)": number;
+  "Total Runs": number;
   // Test suite specific
   Passed?: number;
   Failed?: number;
@@ -43,21 +43,21 @@ export interface ExecutionRow {
  * Color mapping for outcomes
  */
 export const OUTCOME_COLORS: Record<string, string> = {
-  success: '#73BF69', // green
-  pass: '#73BF69',
-  ok: '#73BF69',
-  failure: '#F2495C', // red
-  fail: '#F2495C',
-  error: '#F2495C',
-  cancel: '#B7B7B7', // gray
-  cancelled: '#B7B7B7',
-  skip: '#6E6E6E', // dark gray
-  skipped: '#6E6E6E',
+  success: "#73BF69", // green
+  pass: "#73BF69",
+  ok: "#73BF69",
+  failure: "#F2495C", // red
+  fail: "#F2495C",
+  error: "#F2495C",
+  cancel: "#B7B7B7", // gray
+  cancelled: "#B7B7B7",
+  skip: "#6E6E6E", // dark gray
+  skipped: "#6E6E6E",
 };
 
 /**
  * Get color for outcome
  */
 export function getOutcomeColor(outcome: string): string {
-  return OUTCOME_COLORS[outcome.toLowerCase()] || '#B7B7B7';
+  return OUTCOME_COLORS[outcome.toLowerCase()] || "#B7B7B7";
 }

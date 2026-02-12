@@ -5,30 +5,39 @@
  * https://grafana.com/developers/plugin-tools/how-to-guides/extend-configurations#extend-the-webpack-config
  */
 
-import CopyWebpackPlugin from 'copy-webpack-plugin';
-import ESLintPlugin from 'eslint-webpack-plugin';
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import path from 'path';
-import ReplaceInFileWebpackPlugin from 'replace-in-file-webpack-plugin';
-import TerserPlugin from 'terser-webpack-plugin';
-import { SubresourceIntegrityPlugin } from 'webpack-subresource-integrity';
-import webpack, { type Configuration } from 'webpack';
-import LiveReloadPlugin from 'webpack-livereload-plugin';
-import VirtualModulesPlugin from 'webpack-virtual-modules';
+import CopyWebpackPlugin from "copy-webpack-plugin";
+import ESLintPlugin from "eslint-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
+import path from "path";
+import ReplaceInFileWebpackPlugin from "replace-in-file-webpack-plugin";
+import TerserPlugin from "terser-webpack-plugin";
+import { SubresourceIntegrityPlugin } from "webpack-subresource-integrity";
+import webpack, { type Configuration } from "webpack";
+import LiveReloadPlugin from "webpack-livereload-plugin";
+import VirtualModulesPlugin from "webpack-virtual-modules";
 
-import { BuildModeWebpackPlugin } from './BuildModeWebpackPlugin.ts';
-import { DIST_DIR, SOURCE_DIR } from '../bundler/constants.ts';
-import { getCPConfigVersion, getEntries, getPackageJson, getPluginJson, hasReadme, isWSL } from '../bundler/utils.ts';
-import { externals } from '../bundler/externals.ts';
-import { copyFilePatterns } from '../bundler/copyFiles.ts';
+import { BuildModeWebpackPlugin } from "./BuildModeWebpackPlugin.ts";
+import { DIST_DIR, SOURCE_DIR } from "../bundler/constants.ts";
+import {
+  getCPConfigVersion,
+  getEntries,
+  getPackageJson,
+  getPluginJson,
+  hasReadme,
+  isWSL,
+} from "../bundler/utils.ts";
+import { externals } from "../bundler/externals.ts";
+import { copyFilePatterns } from "../bundler/copyFiles.ts";
 
 const pluginJson = getPluginJson();
 const cpVersion = getCPConfigVersion();
 const pluginVersion = getPackageJson().version;
-const logoPaths = Array.from(new Set([pluginJson.info?.logos?.large, pluginJson.info?.logos?.small])).filter(Boolean);
+const logoPaths = Array.from(
+  new Set([pluginJson.info?.logos?.large, pluginJson.info?.logos?.small]),
+).filter(Boolean);
 const screenshotPaths = pluginJson.info?.screenshots?.map((s: { path: string }) => s.path) || [];
 const virtualPublicPath = new VirtualModulesPlugin({
-  'node_modules/grafana-public-path.js': `
+  "node_modules/grafana-public-path.js": `
 import amdMetaModule from 'amd-module';
 
 __webpack_public_path__ =
@@ -45,16 +54,16 @@ export type Env = {
 const config = async (env: Env): Promise<Configuration> => {
   const baseConfig: Configuration = {
     cache: {
-      type: 'filesystem',
+      type: "filesystem",
       buildDependencies: {
         // __filename doesn't work in Node 24
-        config: [path.resolve(process.cwd(), '.config', 'webpack', 'webpack.config.ts')],
+        config: [path.resolve(process.cwd(), ".config", "webpack", "webpack.config.ts")],
       },
     },
 
     context: path.join(process.cwd(), SOURCE_DIR),
 
-    devtool: env.production ? 'source-map' : 'eval-source-map',
+    devtool: env.production ? "source-map" : "eval-source-map",
 
     entry: await getEntries(),
 
@@ -65,7 +74,7 @@ const config = async (env: Env): Promise<Configuration> => {
       asyncWebAssembly: true,
     },
 
-    mode: env.production ? 'production' : 'development',
+    mode: env.production ? "production" : "development",
 
     module: {
       rules: [
@@ -74,7 +83,7 @@ const config = async (env: Env): Promise<Configuration> => {
           test: /src\/(?:.*\/)?module\.tsx?$/,
           use: [
             {
-              loader: 'imports-loader',
+              loader: "imports-loader",
               options: {
                 imports: `side-effects grafana-public-path`,
               },
@@ -85,14 +94,14 @@ const config = async (env: Env): Promise<Configuration> => {
           exclude: /(node_modules)/,
           test: /\.[tj]sx?$/,
           use: {
-            loader: 'swc-loader',
+            loader: "swc-loader",
             options: {
               jsc: {
                 baseUrl: path.resolve(process.cwd(), SOURCE_DIR),
-                target: 'es2015',
+                target: "es2015",
                 loose: false,
                 parser: {
-                  syntax: 'typescript',
+                  syntax: "typescript",
                   tsx: true,
                   decorators: false,
                   dynamicImport: true,
@@ -103,24 +112,24 @@ const config = async (env: Env): Promise<Configuration> => {
         },
         {
           test: /\.css$/,
-          use: ['style-loader', 'css-loader'],
+          use: ["style-loader", "css-loader"],
         },
         {
           test: /\.s[ac]ss$/,
-          use: ['style-loader', 'css-loader', 'sass-loader'],
+          use: ["style-loader", "css-loader", "sass-loader"],
         },
         {
           test: /\.(png|jpe?g|gif|svg)$/,
-          type: 'asset/resource',
+          type: "asset/resource",
           generator: {
-            filename: Boolean(env.production) ? '[hash][ext]' : '[file]',
+            filename: Boolean(env.production) ? "[hash][ext]" : "[file]",
           },
         },
         {
           test: /\.(woff|woff2|eot|ttf|otf)(\?v=\d+\.\d+\.\d+)?$/,
-          type: 'asset/resource',
+          type: "asset/resource",
           generator: {
-            filename: Boolean(env.production) ? '[hash][ext]' : '[file]',
+            filename: Boolean(env.production) ? "[hash][ext]" : "[file]",
           },
         },
       ],
@@ -132,10 +141,11 @@ const config = async (env: Env): Promise<Configuration> => {
         new TerserPlugin({
           terserOptions: {
             format: {
-              comments: (_, { type, value }) => type === 'comment2' && value.trim().startsWith('[create-plugin]'),
+              comments: (_, { type, value }) =>
+                type === "comment2" && value.trim().startsWith("[create-plugin]"),
             },
             compress: {
-              drop_console: ['log', 'info'],
+              drop_console: ["log", "info"],
             },
           },
         }),
@@ -146,15 +156,15 @@ const config = async (env: Env): Promise<Configuration> => {
       clean: {
         keep: new RegExp(`(.*?_(amd64|arm(64)?)(.exe)?|go_plugin_build_manifest)`),
       },
-      filename: '[name].js',
-      chunkFilename: env.production ? '[name].js?_cache=[contenthash]' : '[name].js',
+      filename: "[name].js",
+      chunkFilename: env.production ? "[name].js?_cache=[contenthash]" : "[name].js",
       library: {
-        type: 'amd',
+        type: "amd",
       },
       path: path.resolve(process.cwd(), DIST_DIR),
       publicPath: `public/plugins/${pluginJson.id}/`,
       uniqueName: pluginJson.id,
-      crossOriginLoading: 'anonymous',
+      crossOriginLoading: "anonymous",
     },
 
     plugins: [
@@ -192,7 +202,7 @@ const config = async (env: Env): Promise<Configuration> => {
         },
       ]),
       new SubresourceIntegrityPlugin({
-        hashFuncNames: ['sha256'],
+        hashFuncNames: ["sha256"],
       }),
       ...(env.development
         ? [
@@ -200,12 +210,12 @@ const config = async (env: Env): Promise<Configuration> => {
             new ForkTsCheckerWebpackPlugin({
               async: Boolean(env.development),
               issue: {
-                include: [{ file: '**/*.{ts,tsx}' }],
+                include: [{ file: "**/*.{ts,tsx}" }],
               },
-              typescript: { configFile: path.join(process.cwd(), 'tsconfig.json') },
+              typescript: { configFile: path.join(process.cwd(), "tsconfig.json") },
             }),
             new ESLintPlugin({
-              extensions: ['.ts', '.tsx'],
+              extensions: [".ts", ".tsx"],
               lintDirtyModulesOnly: Boolean(env.development), // don't lint on start, only lint changed files
               failOnError: Boolean(env.production),
             }),
@@ -214,9 +224,9 @@ const config = async (env: Env): Promise<Configuration> => {
     ],
 
     resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      extensions: [".js", ".jsx", ".ts", ".tsx"],
       // handle resolving "rootDir" paths
-      modules: [path.resolve(process.cwd(), 'src'), 'node_modules'],
+      modules: [path.resolve(process.cwd(), "src"), "node_modules"],
       unsafeCache: true,
     },
   };

@@ -5,7 +5,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
+      - "v*" # Run workflow on version tags, e.g. v1.0.0.
 
 permissions: read-all
 
@@ -30,6 +30,6 @@ jobs:
           policy_token: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
           attestation: true
           use_changelog_generator: true # Enable automatic changelog generation
-          node_version: '20'
+          node_version: "20"
         # Usage of GRAFANA_API_KEY is deprecated, prefer `policy_token` option above
         #grafana_token: $

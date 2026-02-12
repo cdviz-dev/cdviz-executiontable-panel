@@ -1,7 +1,7 @@
-import React, { useRef, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
-import { useTheme2 } from '@grafana/ui';
-import { getOutcomeColor } from '../types';
+import React, { useRef, useEffect, useState } from "react";
+import ReactDOM from "react-dom";
+import { useTheme2 } from "@grafana/ui";
+import { getOutcomeColor } from "../types";
 
 interface HistoryBarChartProps {
   durations: number[];
@@ -54,7 +54,7 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
       return;
     }
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) {
       return;
     }
@@ -151,7 +151,7 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
     const index = Math.floor(x / (barWidth + barGap));
 
     if (index >= 0 && index < barCount && urls[index]) {
-      window.open(urls[index], '_blank');
+      window.open(urls[index], "_blank");
     }
   };
 
@@ -166,24 +166,25 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
           return (
             <div
               style={{
-                position: 'fixed',
+                position: "fixed",
                 left: tooltipPos.x + 8,
                 top: tooltipPos.y - 8,
-                transform: 'translateY(-100%)',
+                transform: "translateY(-100%)",
                 background: theme.colors.background.primary,
                 border: `1px solid ${theme.colors.border.medium}`,
-                borderRadius: '4px',
+                borderRadius: "4px",
                 boxShadow: theme.shadows.z3,
                 zIndex: 10000,
-                pointerEvents: 'none',
-                padding: '8px',
-                fontSize: '12px',
-                whiteSpace: 'nowrap',
+                pointerEvents: "none",
+                padding: "8px",
+                fontSize: "12px",
+                whiteSpace: "nowrap",
               }}
             >
-              <div style={{ fontWeight: 600, marginBottom: '4px' }}>{runIds[i]}</div>
+              <div style={{ fontWeight: 600, marginBottom: "4px" }}>{runIds[i]}</div>
               <div>
-                <strong>Outcome:</strong> <span style={{ color: getOutcomeColor(outcomes[i]) }}>{outcomes[i]}</span>
+                <strong>Outcome:</strong>{" "}
+                <span style={{ color: getOutcomeColor(outcomes[i]) }}>{outcomes[i]}</span>
               </div>
               <div>
                 <strong>Duration:</strong> {durations[i].toFixed(1)}s
@@ -203,7 +204,9 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
                   <strong>Completed:</strong> {completionTime}
                 </div>
               )}
-              <div style={{ marginTop: '4px', fontSize: '0.85em', color: theme.colors.text.secondary }}>
+              <div
+                style={{ marginTop: "4px", fontSize: "0.85em", color: theme.colors.text.secondary }}
+              >
                 Click to open details
               </div>
             </div>
@@ -212,7 +215,7 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
       : null;
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div style={{ position: "relative", display: "inline-block" }}>
       <canvas
         ref={canvasRef}
         width={canvasWidth}
@@ -220,7 +223,7 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: "pointer" }}
       />
       {tooltip && ReactDOM.createPortal(tooltip, document.body)}
     </div>

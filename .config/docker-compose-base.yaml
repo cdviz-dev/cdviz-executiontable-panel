@@ -1,7 +1,7 @@
 services:
   grafana:
     user: root
-    container_name: 'cdviz-executiontable-panel'
+    container_name: "cdviz-executiontable-panel"
 
     build:
       context: .

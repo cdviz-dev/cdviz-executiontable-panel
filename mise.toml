@@ -1,5 +1,6 @@
 [tools]
 "yarn" = "latest"
+"dprint" = "latest"
 
 [tasks."install:deps"]
 description = "install npm dependencies"
@@ -9,6 +10,13 @@ run = "yarn install"
 description = "run TypeScript type checking"
 run = "yarn run typecheck"
 wait_for = ["install:deps"]
+
+[tasks."format"]
+alias = "fmt"
+description = "Format the code and sort dependencies"
+run = [
+  "dprint fmt",
+]
 
 [tasks.lint]
 description = "lint code with eslint"

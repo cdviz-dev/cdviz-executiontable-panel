@@ -1,5 +1,5 @@
-declare module 'replace-in-file-webpack-plugin' {
-  import { Compiler, Plugin } from 'webpack';
+declare module "replace-in-file-webpack-plugin" {
+  import { Compiler, Plugin } from "webpack";
 
   interface ReplaceRule {
     search: string | RegExp;
@@ -22,11 +22,11 @@ declare module 'replace-in-file-webpack-plugin' {
   export = ReplaceInFilePlugin;
 }
 
-declare module 'webpack-livereload-plugin' {
-  import { ServerOptions } from 'https';
-  import { Compiler, Plugin, Stats, Compilation } from 'webpack';
+declare module "webpack-livereload-plugin" {
+  import { ServerOptions } from "https";
+  import { Compiler, Plugin, Stats, Compilation } from "webpack";
 
-  interface Options extends Pick<ServerOptions, 'cert' | 'key' | 'pfx'> {
+  interface Options extends Pick<ServerOptions, "cert" | "key" | "pfx"> {
     /**
      * protocol for livereload `<script>` src attribute value
      * @default protocol of the page, either `http` or `https`

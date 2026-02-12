@@ -1,6 +1,6 @@
-import webpack from 'webpack';
+import webpack from "webpack";
 
-const PLUGIN_NAME = 'BuildModeWebpack';
+const PLUGIN_NAME = "BuildModeWebpack";
 
 export class BuildModeWebpackPlugin {
   apply(compiler: webpack.Compiler) {
@@ -13,7 +13,7 @@ export class BuildModeWebpackPlugin {
         async () => {
           const assets = compilation.getAssets();
           for (const asset of assets) {
-            if (asset.name.endsWith('plugin.json')) {
+            if (asset.name.endsWith("plugin.json")) {
               const pluginJsonString = asset.source.source().toString();
               const pluginJsonWithBuildMode = JSON.stringify(
                 {
@@ -21,12 +21,15 @@ export class BuildModeWebpackPlugin {
                   buildMode: compilation.options.mode,
                 },
                 null,
-                4
+                4,
               );
-              compilation.updateAsset(asset.name, new webpack.sources.RawSource(pluginJsonWithBuildMode));
+              compilation.updateAsset(
+                asset.name,
+                new webpack.sources.RawSource(pluginJsonWithBuildMode),
+              );
             }
           }
-        }
+        },
       );
     });
   }
