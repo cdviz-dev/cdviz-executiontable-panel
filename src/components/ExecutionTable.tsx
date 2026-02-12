@@ -1,7 +1,13 @@
 import type { PanelProps } from "@grafana/data";
 import { useTheme2 } from "@grafana/ui";
 import React, { useMemo } from "react";
-import { type ExecutionRow, type ExecutionTableOptions, getOutcomeColor } from "../types";
+import {
+  type ExecutionRow,
+  type ExecutionTableOptions,
+  type SortColumn,
+  type SortDirection,
+  getOutcomeColor,
+} from "../types";
 import { HistoryBarChart } from "./HistoryBarChart";
 
 // Helper function to parse array fields that might come as strings
@@ -66,17 +72,6 @@ const sanitizeNumericArray = (arr: any[]): number[] => {
   });
 };
 
-type SortColumn =
-  | "Name"
-  | "Last Duration (s)"
-  | "Last Queue (s)"
-  | "P80 Duration (s)"
-  | "Total Runs"
-  | "Passed"
-  | "Failed"
-  | "Skipped";
-type SortDirection = "asc" | "desc";
-
 export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
   data,
   options,
@@ -84,8 +79,10 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
   height,
 }) => {
   const theme = useTheme2();
-  const [sortBy, setSortBy] = React.useState<SortColumn>("Name");
-  const [sortDirection, setSortDirection] = React.useState<SortDirection>("asc");
+  const [sortBy, setSortBy] = React.useState<SortColumn>(options.defaultSortColumn || "Name");
+  const [sortDirection, setSortDirection] = React.useState<SortDirection>(
+    options.defaultSortDirection || "asc",
+  );
 
   // Construct the percentile column name dynamically
   const percentileColumnName = `P${options.durationPercentile || 80} Duration (s)`;
@@ -224,6 +221,24 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
           aVal = a.Skipped ?? -1;
           bVal = b.Skipped ?? -1;
           break;
+        case "Completion Time":
+          // Sort by last completion time (most recent timestamp)
+          aVal =
+            a["Completion Times"].length > 0
+              ? a["Completion Times"][a["Completion Times"].length - 1]
+              : "";
+          bVal =
+            b["Completion Times"].length > 0
+              ? b["Completion Times"][b["Completion Times"].length - 1]
+              : "";
+          break;
+        case "Started Time":
+          // Sort by last started time (most recent timestamp)
+          aVal =
+            a["Started Times"].length > 0 ? a["Started Times"][a["Started Times"].length - 1] : "";
+          bVal =
+            b["Started Times"].length > 0 ? b["Started Times"][b["Started Times"].length - 1] : "";
+          break;
         default:
           return 0;
       }
@@ -334,9 +349,13 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
                 padding: "12px 8px",
                 textAlign: "left",
                 fontWeight: 600,
+                cursor: "pointer",
+                userSelect: "none",
+                whiteSpace: "nowrap",
               }}
+              onClick={() => handleSort("Completion Time")}
             >
-              History
+              History{renderSortIcon("Completion Time")}
             </th>
             <th
               style={{

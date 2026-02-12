@@ -12,6 +12,9 @@ describe("ExecutionTable", () => {
     barWidth: 8,
     barGap: 2,
     durationPercentile: 80,
+    defaultSortColumn: "Name",
+    defaultSortDirection: "asc",
+    dateTimeZone: "browser",
   };
 
   const createMockPanelProps = (data: any): PanelProps<ExecutionTableOptions> => ({

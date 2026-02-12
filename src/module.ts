@@ -62,6 +62,38 @@ export const plugin = new PanelPlugin<ExecutionTableOptions>(ExecutionTable).set
           max: 99,
           integer: true,
         },
+      })
+      .addSelect({
+        path: "defaultSortColumn",
+        name: "Default sort column",
+        description: "Column to sort by when the panel loads",
+        defaultValue: "Name",
+        settings: {
+          options: [
+            { value: "Name", label: "Name" },
+            { value: "Last Duration (s)", label: "Last Duration" },
+            { value: "Last Queue (s)", label: "Last Queue" },
+            { value: "P80 Duration (s)", label: "P80 Duration" },
+            { value: "Total Runs", label: "Total Runs" },
+            { value: "Passed", label: "Passed" },
+            { value: "Failed", label: "Failed" },
+            { value: "Skipped", label: "Skipped" },
+            { value: "Completion Time", label: "Completion Time (Last)" },
+            { value: "Started Time", label: "Started Time (Last)" },
+          ],
+        },
+      })
+      .addRadio({
+        path: "defaultSortDirection",
+        name: "Default sort direction",
+        description: "Sort direction when the panel loads",
+        defaultValue: "asc",
+        settings: {
+          options: [
+            { value: "asc", label: "Ascending" },
+            { value: "desc", label: "Descending" },
+          ],
+        },
       });
   },
 );

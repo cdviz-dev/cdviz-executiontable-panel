@@ -1,4 +1,24 @@
 /**
+ * Sort columns available for the execution table
+ */
+export type SortColumn =
+  | "Name"
+  | "Last Duration (s)"
+  | "Last Queue (s)"
+  | "P80 Duration (s)"
+  | "Total Runs"
+  | "Passed"
+  | "Failed"
+  | "Skipped"
+  | "Completion Time"
+  | "Started Time";
+
+/**
+ * Sort direction
+ */
+export type SortDirection = "asc" | "desc";
+
+/**
  * Panel options for ExecutionTable panel
  */
 export interface ExecutionTableOptions {
@@ -14,6 +34,10 @@ export interface ExecutionTableOptions {
   barGap: number;
   /** Duration percentile to display (e.g., 50, 80, 90, 95) */
   durationPercentile: number;
+  /** Default column to sort by */
+  defaultSortColumn: SortColumn;
+  /** Default sort direction (asc or desc) */
+  defaultSortDirection: SortDirection;
 }
 
 /**
