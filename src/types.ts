@@ -28,6 +28,7 @@ export interface ExecutionRow {
   "Started Times": string[];
   "Completion Times": string[];
   "Queue History (s)"?: number[];
+  // Last values are automatically extracted from arrays using timestamps
   "Last Outcome": string;
   "Last Duration (s)": number;
   "Last Queue (s)"?: number;

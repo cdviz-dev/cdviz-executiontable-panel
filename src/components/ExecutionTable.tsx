@@ -19,8 +19,10 @@ const parseArray = (value: any): any[] => {
     }
 
     // TestData CSV wraps the entire value in quotes, so strip outer quotes if present
-    if ((stringValue.startsWith('"') && stringValue.endsWith('"')) ||
-        (stringValue.startsWith("'") && stringValue.endsWith("'"))) {
+    if (
+      (stringValue.startsWith('"') && stringValue.endsWith('"')) ||
+      (stringValue.startsWith("'") && stringValue.endsWith("'"))
+    ) {
       stringValue = stringValue.slice(1, -1);
     }
 
@@ -103,25 +105,26 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
       return [];
     }
 
-    const nameField = series.fields.find((f) => f.name === "Name");
-    const runHistoryField = series.fields.find((f) => f.name === "Run History (s)");
-    const outcomeHistoryField = series.fields.find((f) => f.name === "Outcome History");
-    const runIdsField = series.fields.find((f) => f.name === "Run IDs");
-    const urlsField = series.fields.find((f) => f.name === "URLs");
-    const startedTimesField = series.fields.find((f) => f.name === "Started Times");
-    const completionTimesField = series.fields.find((f) => f.name === "Completion Times");
-    const queueHistoryField = series.fields.find((f) => f.name === "Queue History (s)");
-    const lastOutcomeField = series.fields.find((f) => f.name === "Last Outcome");
-    const lastDurationField = series.fields.find((f) => f.name === "Last Duration (s)");
-    const lastQueueField = series.fields.find((f) => f.name === "Last Queue (s)");
+    // Helper to find field with flexible matching (trim whitespace, case-insensitive)
+    const findField = (name: string) => {
+      return series.fields.find((f) => f.name?.trim().toLowerCase() === name.trim().toLowerCase());
+    };
+
+    const nameField = findField("Name");
+    const runHistoryField = findField("Run History (s)");
+    const outcomeHistoryField = findField("Outcome History");
+    const runIdsField = findField("Run IDs");
+    const urlsField = findField("URLs");
+    const startedTimesField = findField("Started Times");
+    const completionTimesField = findField("Completion Times");
+    const queueHistoryField = findField("Queue History (s)");
     // Look for the configured percentile column, fallback to P80 for backward compatibility
     const percentileDurationField =
-      series.fields.find((f) => f.name === percentileColumnName) ||
-      series.fields.find((f) => f.name === "P80 Duration (s)");
-    const totalRunsField = series.fields.find((f) => f.name === "Total Runs");
-    const passedField = series.fields.find((f) => f.name === "Passed");
-    const failedField = series.fields.find((f) => f.name === "Failed");
-    const skippedField = series.fields.find((f) => f.name === "Skipped");
+      findField(percentileColumnName) || findField("P80 Duration (s)");
+    const totalRunsField = findField("Total Runs");
+    const passedField = findField("Passed");
+    const failedField = findField("Failed");
+    const skippedField = findField("Skipped");
 
     if (!nameField || !runHistoryField) {
       return [];
@@ -131,25 +134,52 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
     const result: ExecutionRow[] = [];
 
     for (let i = 0; i < rowCount; i++) {
+      const runHistory = sanitizeNumericArray(parseArray(runHistoryField.values[i]));
+      const outcomeHistory = parseArray(outcomeHistoryField?.values[i]);
+      const completionTimes = parseArray(completionTimesField?.values[i]);
+      const startedTimes = parseArray(startedTimesField?.values[i]);
+      const queueHistory = queueHistoryField?.values[i]
+        ? sanitizeNumericArray(parseArray(queueHistoryField.values[i]))
+        : undefined;
+
+      // The last element in arrays represents the most recent execution
+      // Arrays are expected to be in chronological order (oldest to newest)
+      const lastIndex = Math.max(
+        completionTimes.length - 1,
+        startedTimes.length - 1,
+        runHistory.length - 1,
+        outcomeHistory.length - 1,
+      );
+
+      // Extract last values from arrays (use the last element)
+      const lastOutcome =
+        lastIndex >= 0 && outcomeHistory.length > 0
+          ? String(outcomeHistory[outcomeHistory.length - 1])
+          : "unknown";
+      const lastDuration =
+        lastIndex >= 0 && runHistory.length > 0 ? Number(runHistory[runHistory.length - 1]) : 0;
+      const lastQueue =
+        queueHistory && queueHistory.length > 0
+          ? Number(queueHistory[queueHistory.length - 1])
+          : undefined;
+
       result.push({
         Name: nameField.values[i],
-        "Run History (s)": sanitizeNumericArray(parseArray(runHistoryField.values[i])),
-        "Outcome History": parseArray(outcomeHistoryField?.values[i]),
+        "Run History (s)": runHistory,
+        "Outcome History": outcomeHistory,
         "Run IDs": parseArray(runIdsField?.values[i]),
         URLs: parseArray(urlsField?.values[i]),
-        "Started Times": parseArray(startedTimesField?.values[i]),
-        "Completion Times": parseArray(completionTimesField?.values[i]),
-        "Queue History (s)": queueHistoryField?.values[i]
-          ? sanitizeNumericArray(parseArray(queueHistoryField.values[i]))
-          : undefined,
-        "Last Outcome": lastOutcomeField?.values[i] || "unknown",
-        "Last Duration (s)": lastDurationField?.values[i] || 0,
-        "Last Queue (s)": lastQueueField?.values[i],
-        "P80 Duration (s)": percentileDurationField?.values[i] || 0,
-        "Total Runs": totalRunsField?.values[i] || 0,
-        Passed: passedField?.values[i],
-        Failed: failedField?.values[i],
-        Skipped: skippedField?.values[i],
+        "Started Times": startedTimes,
+        "Completion Times": completionTimes,
+        "Queue History (s)": queueHistory,
+        "Last Outcome": lastOutcome,
+        "Last Duration (s)": lastDuration,
+        "Last Queue (s)": lastQueue,
+        "P80 Duration (s)": parseFloat(percentileDurationField?.values[i]) || 0,
+        "Total Runs": parseInt(totalRunsField?.values[i], 10) || 0,
+        Passed: passedField?.values[i] ? parseInt(passedField.values[i], 10) : undefined,
+        Failed: failedField?.values[i] ? parseInt(failedField.values[i], 10) : undefined,
+        Skipped: skippedField?.values[i] ? parseInt(skippedField.values[i], 10) : undefined,
       });
     }
 
