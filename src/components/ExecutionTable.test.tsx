@@ -1,8 +1,8 @@
-import React from "react";
+import { FieldType, LoadingState, type PanelProps, toDataFrame } from "@grafana/data";
 import { render, screen } from "@testing-library/react";
+import React from "react";
+import type { ExecutionTableOptions } from "../types";
 import { ExecutionTable } from "./ExecutionTable";
-import { PanelProps, FieldType, LoadingState, toDataFrame } from "@grafana/data";
-import { ExecutionTableOptions } from "../types";
 
 describe("ExecutionTable", () => {
   const defaultOptions: ExecutionTableOptions = {

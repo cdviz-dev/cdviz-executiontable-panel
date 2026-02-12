@@ -94,6 +94,18 @@ export const plugin = new PanelPlugin<ExecutionTableOptions>(ExecutionTable).set
             { value: "desc", label: "Descending" },
           ],
         },
+      })
+      .addRadio({
+        path: "dateTimeZone",
+        name: "Date/time display timezone",
+        description: "Timezone for displaying started and completed times in tooltips",
+        defaultValue: "browser",
+        settings: {
+          options: [
+            { value: "browser", label: "Browser local time" },
+            { value: "utc", label: "UTC" },
+          ],
+        },
       });
   },
 );

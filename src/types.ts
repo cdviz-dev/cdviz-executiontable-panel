@@ -38,6 +38,8 @@ export interface ExecutionTableOptions {
   defaultSortColumn: SortColumn;
   /** Default sort direction (asc or desc) */
   defaultSortDirection: SortDirection;
+  /** Timezone for displaying dates: 'browser' for local time, 'utc' for UTC */
+  dateTimeZone: "browser" | "utc";
 }
 
 /**

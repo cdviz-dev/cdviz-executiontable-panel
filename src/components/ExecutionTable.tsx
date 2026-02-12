@@ -4,14 +4,14 @@ import React, { useMemo } from "react";
 import {
   type ExecutionRow,
   type ExecutionTableOptions,
+  getOutcomeColor,
   type SortColumn,
   type SortDirection,
-  getOutcomeColor,
 } from "../types";
 import { HistoryBarChart } from "./HistoryBarChart";
 
 // Helper function to parse array fields that might come as strings
-// Supports both JSON array syntax [...] and SQL array syntax {...}
+// Supports JSON array syntax [...], SQL array syntax {...}, and PostgreSQL syntax (...)
 const parseArray = (value: any): any[] => {
   if (Array.isArray(value)) {
     return value;
@@ -32,19 +32,32 @@ const parseArray = (value: any): any[] => {
       stringValue = stringValue.slice(1, -1);
     }
 
-    // Convert SQL array syntax {a,b,c} to JSON array syntax [a,b,c]
-    if (stringValue.startsWith("{") && stringValue.endsWith("}")) {
-      // Handle SQL array format manually (more reliable than JSON.parse)
-      const content = stringValue.slice(1, -1);
+    // Helper to parse comma-separated values
+    const parseCommaSeparated = (content: string): any[] => {
       if (!content) {
         return [];
       }
       return content.split(",").map((v: string) => {
         const val = v.trim();
-        // Try to parse as number
-        const num = parseFloat(val);
-        return isNaN(num) ? val : num;
+        // Only convert to number if the ENTIRE string is numeric
+        // This prevents "2025-01-01" from becoming just 2025
+        if (/^-?\d+\.?\d*$/.test(val)) {
+          return parseFloat(val);
+        }
+        return val;
       });
+    };
+
+    // Convert SQL array syntax {a,b,c}
+    if (stringValue.startsWith("{") && stringValue.endsWith("}")) {
+      const content = stringValue.slice(1, -1);
+      return parseCommaSeparated(content);
+    }
+
+    // Convert PostgreSQL array syntax (a,b,c)
+    if (stringValue.startsWith("(") && stringValue.endsWith(")")) {
+      const content = stringValue.slice(1, -1);
+      return parseCommaSeparated(content);
     }
 
     // Try JSON array format [a,b,c]
@@ -77,13 +90,13 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
   options,
   width,
   height,
+  timeZone,
 }) => {
   const theme = useTheme2();
   const [sortBy, setSortBy] = React.useState<SortColumn>(options.defaultSortColumn || "Name");
   const [sortDirection, setSortDirection] = React.useState<SortDirection>(
     options.defaultSortDirection || "asc",
   );
-
   // Construct the percentile column name dynamically
   const percentileColumnName = `P${options.durationPercentile || 80} Duration (s)`;
 
@@ -500,6 +513,8 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
                       ? row["Queue History (s)"].slice(0, options.maxHistoryItems)
                       : undefined
                   }
+                  timeZone={timeZone}
+                  dateTimeZone={options.dateTimeZone || "browser"}
                 />
               </td>
               <td style={{ padding: "8px", textAlign: "center" }}>

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { useTheme2 } from "@grafana/ui";
+import { dateTime } from "@grafana/data";
 import { getOutcomeColor } from "../types";
 
 interface HistoryBarChartProps {
@@ -18,6 +19,10 @@ interface HistoryBarChartProps {
   queueDurations?: number[];
   /** Gap in pixels between run and queue sections */
   mirrorGap?: number;
+  /** Grafana timezone setting (not currently used, kept for compatibility) */
+  timeZone?: string;
+  /** Display timezone: 'browser' for local time, 'utc' for UTC */
+  dateTimeZone?: "browser" | "utc";
 }
 
 export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
@@ -33,6 +38,8 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
   barGap = 2,
   queueDurations,
   mirrorGap = 1,
+  timeZone,
+  dateTimeZone = "browser",
 }) => {
   const theme = useTheme2();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -155,6 +162,49 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
     }
   };
 
+  const formatDateTime = (dateTimeStr: string): string => {
+    if (!dateTimeStr) {
+      return "";
+    }
+
+    // Parse the datetime - handle various formats
+    let dt;
+
+    // First check if it's a valid ISO string before trying to parse as number
+    const isISOString =
+      typeof dateTimeStr === "string" && (dateTimeStr.includes("T") || dateTimeStr.includes("-"));
+
+    if (isISOString) {
+      // It's likely an ISO format string
+      dt = dateTime(dateTimeStr);
+    } else if (!isNaN(Number(dateTimeStr))) {
+      // It's a number (Unix timestamp)
+      const num = Number(dateTimeStr);
+      // If timestamp is less than 10000000000, it's likely in seconds, otherwise milliseconds
+      dt = dateTime(num < 10000000000 ? num * 1000 : num);
+    } else {
+      // Try to parse as-is
+      dt = dateTime(dateTimeStr);
+    }
+
+    // Check if the date is valid
+    if (!dt.isValid()) {
+      return dateTimeStr;
+    }
+
+    // Determine which timezone to display
+    let formatted: string;
+    if (dateTimeZone === "utc") {
+      // Display in UTC
+      formatted = dt.utc().format("YYYY-MM-DD HH:mm:ss");
+      return formatted + " UTC";
+    } else {
+      // Display in browser's local timezone
+      formatted = dt.format("YYYY-MM-DD HH:mm:ss");
+      return formatted;
+    }
+  };
+
   const tooltip =
     hoveredIndex !== null && tooltipPos
       ? (() => {
@@ -176,9 +226,10 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
                 boxShadow: theme.shadows.z3,
                 zIndex: 10000,
                 pointerEvents: "none",
-                padding: "8px",
+                padding: "8px 12px",
                 fontSize: "12px",
                 whiteSpace: "nowrap",
+                minWidth: "280px",
               }}
             >
               <div style={{ fontWeight: 600, marginBottom: "4px" }}>{runIds[i]}</div>
@@ -196,12 +247,12 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
               )}
               {startedTime && (
                 <div>
-                  <strong>Started:</strong> {startedTime}
+                  <strong>Started:</strong> {formatDateTime(startedTime)}
                 </div>
               )}
               {completionTime && (
                 <div>
-                  <strong>Completed:</strong> {completionTime}
+                  <strong>Completed:</strong> {formatDateTime(completionTime)}
                 </div>
               )}
               <div
