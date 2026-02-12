@@ -16,7 +16,6 @@ interface HistoryBarChartProps {
   barGap: number;
   /** Optional queue durations rendered mirrored below run bars */
   queueDurations?: number[];
-  maxQueueValue?: number;
   /** Gap in pixels between run and queue sections */
   mirrorGap?: number;
 }
@@ -33,7 +32,6 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
   barHeight = 20,
   barGap = 2,
   queueDurations,
-  maxQueueValue = 0,
   mirrorGap = 1,
 }) => {
   const theme = useTheme2();
@@ -41,7 +39,7 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
 
-  const hasQueue = queueDurations && queueDurations.length > 0 && maxQueueValue > 0;
+  const hasQueue = queueDurations && queueDurations.length > 0;
   const barCount = durations.length;
   const canvasWidth = barCount * (barWidth + barGap);
   const runSectionHeight = barHeight;
@@ -84,7 +82,7 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
       const queueTop = baseline + gapHeight;
       queueDurations.forEach((duration, index) => {
         const x = index * (barWidth + barGap);
-        const scaledH = maxQueueValue > 0 ? (duration / maxQueueValue) * queueSectionHeight : 0;
+        const scaledH = maxValue > 0 ? (duration / maxValue) * queueSectionHeight : 0;
 
         const baseColor = getOutcomeColor(outcomes[index]);
         ctx.globalAlpha = 0.5;
@@ -114,7 +112,6 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
     theme,
     hasQueue,
     queueDurations,
-    maxQueueValue,
     runSectionHeight,
     queueSectionHeight,
   ]);

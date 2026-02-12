@@ -181,15 +181,9 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({ da
           max = d;
         }
       });
-    });
-    return max;
-  }, [sortedRows]);
-
-  const maxQueueDuration = useMemo(() => {
-    let max = 0;
-    sortedRows.forEach((row) => {
-      if (row['Queue History (s)']) {
-        row['Queue History (s)'].forEach((d) => {
+      // Include queue durations in the max calculation for unified scale
+      if (row["Queue History (s)"]) {
+        row["Queue History (s)"].forEach((d) => {
           if (d > max) {
             max = d;
           }
@@ -396,7 +390,6 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({ da
                       ? row['Queue History (s)'].slice(0, options.maxHistoryItems)
                       : undefined
                   }
-                  maxQueueValue={maxQueueDuration}
                 />
               </td>
               <td style={{ padding: '8px', textAlign: 'center' }}>
