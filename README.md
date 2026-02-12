@@ -82,6 +82,63 @@ sudo systemctl restart grafana-server
    - **Bar gap**: Spacing between bars in pixels (0-10px, default: 2px)
    - **Duration percentile**: Percentile value for duration display (1-99, default: 80 for P80)
 
+## Input Data Format
+
+The plugin expects tabular data with the following columns. Arrays use PostgreSQL notation: `{value1,value2,value3}`.
+
+### Required Fields
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `Name` | string | Unique identifier for the execution (pipeline name, test suite name, etc.) |
+| `Run History (s)` | number[] | Array of execution durations in seconds, oldest to newest |
+| `Outcome History` | string[] | Array of execution outcomes (e.g., `success`, `failure`, `pass`, `fail`, `cancel`, `skip`) |
+| `Run IDs` | string[] | Array of unique execution run identifiers |
+| `URLs` | string[] | Array of URLs linking to detailed execution views |
+| `Started Times` | timestamp[] | Array of ISO 8601 timestamps when executions started |
+| `Completion Times` | timestamp[] | Array of ISO 8601 timestamps when executions completed |
+| `Last Outcome` | string | Outcome of the most recent execution |
+| `Last Duration (s)` | number | Duration of the most recent execution in seconds |
+| `P80 Duration (s)` | number | 80th percentile duration in seconds (or your configured percentile) |
+| `Total Runs` | number | Total count of historical executions |
+
+### Optional Fields
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `Queue History (s)` | number[] | Array of queue durations in seconds (for pipelines and test suites) |
+| `Last Queue (s)` | number | Queue duration of the most recent execution in seconds |
+| `Passed` | number | Count of passed tests (for test suites only) |
+| `Failed` | number | Count of failed tests (for test suites only) |
+| `Skipped` | number | Count of skipped tests (for test suites only) |
+
+### Array Notation
+
+Array fields accept both **SQL (PostgreSQL)** and **JSON** formats:
+
+**SQL Format** (PostgreSQL-style with curly braces):
+- Numbers: `{43.1,44.5,45.9}`
+- Strings: `{success,failure,success}`
+- URLs/IDs: `{run-1,run-2,run-3}`
+- Timestamps: `{2025-01-01T08:00:00Z,2025-01-02T08:00:00Z}`
+
+**JSON Format** (standard JSON arrays):
+- Numbers: `[43.1,44.5,45.9]`
+- Strings: `["success","failure","success"]`
+- URLs/IDs: `["run-1","run-2","run-3"]`
+- Timestamps: `["2025-01-01T08:00:00Z","2025-01-02T08:00:00Z"]`
+
+**Important**: Array fields must have the same length (represent the same execution history window).
+
+### Sample CSV
+
+```csv
+Name,Run History (s),Outcome History,Run IDs,URLs,Queue History (s),Started Times,Completion Times,Last Outcome,Last Duration (s),Last Queue (s),P80 Duration (s),Total Runs
+build-main,"{43.1,44.5,45.9,42.9,47.8}","{success,success,success,success,failure}","{run-1230,run-1231,run-1232,run-1233,run-1234}","{https://ci.example.com/build/1230,https://ci.example.com/build/1231,https://ci.example.com/build/1232,https://ci.example.com/build/1233,https://ci.example.com/build/1234}","{1.8,1.9,2.1,2.0,1.8}","{2025-01-16T08:00:00Z,2025-01-17T08:00:00Z,2025-01-18T08:00:00Z,2025-01-19T08:00:00Z,2025-01-20T08:00:00Z}","{2025-01-16T08:00:46Z,2025-01-17T08:00:44Z,2025-01-18T08:00:47Z,2025-01-19T08:00:45Z,2025-01-20T08:00:45Z}",success,45.0,1.8,47.1,234
+```
+
+For a complete example with multiple execution types (pipelines, tasks, test suites), see the [test-showcase.json](provisioning/dashboards/test-showcase.json) dashboard.
+
 ## Usage
 
 ### Understanding the table columns

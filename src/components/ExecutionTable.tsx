@@ -11,17 +11,45 @@ const parseArray = (value: any): any[] => {
     return value;
   }
   if (typeof value === "string") {
-    try {
-      let stringValue = value.trim();
-      // Convert SQL array syntax {a,b,c} to JSON array syntax [a,b,c]
-      if (stringValue.startsWith("{") && stringValue.endsWith("}")) {
-        stringValue = "[" + stringValue.slice(1, -1) + "]";
-      }
-      const parsed = JSON.parse(stringValue);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
+    let stringValue = value.trim();
+
+    // Handle empty string
+    if (!stringValue) {
       return [];
     }
+
+    // TestData CSV wraps the entire value in quotes, so strip outer quotes if present
+    if ((stringValue.startsWith('"') && stringValue.endsWith('"')) ||
+        (stringValue.startsWith("'") && stringValue.endsWith("'"))) {
+      stringValue = stringValue.slice(1, -1);
+    }
+
+    // Convert SQL array syntax {a,b,c} to JSON array syntax [a,b,c]
+    if (stringValue.startsWith("{") && stringValue.endsWith("}")) {
+      // Handle SQL array format manually (more reliable than JSON.parse)
+      const content = stringValue.slice(1, -1);
+      if (!content) {
+        return [];
+      }
+      return content.split(",").map((v: string) => {
+        const val = v.trim();
+        // Try to parse as number
+        const num = parseFloat(val);
+        return isNaN(num) ? val : num;
+      });
+    }
+
+    // Try JSON array format [a,b,c]
+    if (stringValue.startsWith("[") && stringValue.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(stringValue);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    return [];
   }
   return [];
 };
