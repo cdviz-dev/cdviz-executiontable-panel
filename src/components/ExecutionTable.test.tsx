@@ -623,7 +623,7 @@ describe("ExecutionTable", () => {
       {
         name: "Tags",
         type: FieldType.other,
-        values: ['{artifactId=>my-service, environment=>production}'],
+        values: ["{artifactId=>my-service, environment=>production}"],
       },
     ]);
 
@@ -684,7 +684,7 @@ describe("ExecutionTable", () => {
       {
         name: "Tags",
         type: FieldType.other,
-        values: ['artifactId=my-service,environment=production'],
+        values: ["artifactId=my-service,environment=production"],
       },
     ]);
 

@@ -102,13 +102,13 @@ The plugin expects tabular data with the following columns. Arrays use PostgreSQ
 
 ### Optional Fields
 
-| Field Name          | Type                    | Description                                                         |
-| ------------------- | ----------------------- | ------------------------------------------------------------------- |
-| `Queue History (s)` | number[]                | Array of queue durations in seconds (for pipelines and test suites) |
-| `Passed`            | number                  | Count of passed tests (for test suites only)                        |
-| `Failed`            | number                  | Count of failed tests (for test suites only)                        |
-| `Skipped`           | number                  | Count of skipped tests (for test suites only)                       |
-| `Tags`              | Record<string, string>  | Key-value pairs for complementary information (artifactId, environment, team, etc.) |
+| Field Name          | Type                   | Description                                                                         |
+| ------------------- | ---------------------- | ----------------------------------------------------------------------------------- |
+| `Queue History (s)` | number[]               | Array of queue durations in seconds (for pipelines and test suites)                 |
+| `Passed`            | number                 | Count of passed tests (for test suites only)                                        |
+| `Failed`            | number                 | Count of failed tests (for test suites only)                                        |
+| `Skipped`           | number                 | Count of skipped tests (for test suites only)                                       |
+| `Tags`              | Record<string, string> | Key-value pairs for complementary information (artifactId, environment, team, etc.) |
 
 ### Auto-Computed Fields
 
@@ -147,21 +147,25 @@ Array fields accept both **SQL (PostgreSQL)** and **JSON** formats:
 The optional `Tags` field accepts key-value pairs in multiple formats:
 
 **JSON Format**:
+
 ```json
-{"artifactId":"my-service","environment":"production","team":"platform"}
+{ "artifactId": "my-service", "environment": "production", "team": "platform" }
 ```
 
 **PostgreSQL HSTORE Format**:
+
 ```
 artifactId=>my-service, environment=>production, team=>platform
 ```
 
 **Key-Value Format**:
+
 ```
 artifactId=my-service,environment=production,team=platform
 ```
 
 Tags are displayed as badges in the table, providing quick access to complementary information about each execution. Common use cases include:
+
 - **artifactId**: Identifier for the artifact being built/tested
 - **environment**: Target environment (dev, staging, production)
 - **team**: Owning team or department
