@@ -1,6 +1,6 @@
 {
   "name": "executiontable",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "CDviz Execution Table Panel - Interactive table with bar chart history visualization",
   "author": "Cdviz",
   "license": "Apache-2.0",
