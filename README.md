@@ -102,12 +102,13 @@ The plugin expects tabular data with the following columns. Arrays use PostgreSQ
 
 ### Optional Fields
 
-| Field Name          | Type     | Description                                                         |
-| ------------------- | -------- | ------------------------------------------------------------------- |
-| `Queue History (s)` | number[] | Array of queue durations in seconds (for pipelines and test suites) |
-| `Passed`            | number   | Count of passed tests (for test suites only)                        |
-| `Failed`            | number   | Count of failed tests (for test suites only)                        |
-| `Skipped`           | number   | Count of skipped tests (for test suites only)                       |
+| Field Name          | Type                    | Description                                                         |
+| ------------------- | ----------------------- | ------------------------------------------------------------------- |
+| `Queue History (s)` | number[]                | Array of queue durations in seconds (for pipelines and test suites) |
+| `Passed`            | number                  | Count of passed tests (for test suites only)                        |
+| `Failed`            | number                  | Count of failed tests (for test suites only)                        |
+| `Skipped`           | number                  | Count of skipped tests (for test suites only)                       |
+| `Tags`              | Record<string, string>  | Key-value pairs for complementary information (artifactId, environment, team, etc.) |
 
 ### Auto-Computed Fields
 
@@ -141,11 +142,37 @@ Array fields accept both **SQL (PostgreSQL)** and **JSON** formats:
 
 **Important**: Array fields must have the same length (represent the same execution history window).
 
+### Tags Format
+
+The optional `Tags` field accepts key-value pairs in multiple formats:
+
+**JSON Format**:
+```json
+{"artifactId":"my-service","environment":"production","team":"platform"}
+```
+
+**PostgreSQL HSTORE Format**:
+```
+artifactId=>my-service, environment=>production, team=>platform
+```
+
+**Key-Value Format**:
+```
+artifactId=my-service,environment=production,team=platform
+```
+
+Tags are displayed as badges in the table, providing quick access to complementary information about each execution. Common use cases include:
+- **artifactId**: Identifier for the artifact being built/tested
+- **environment**: Target environment (dev, staging, production)
+- **team**: Owning team or department
+- **version**: Software version or build number
+- **region**: Deployment region or data center
+
 ### Sample CSV
 
 ```csv
-Name,Run History (s),Outcome History,Run IDs,URLs,Queue History (s),Started Times,Completion Times,P80 Duration (s),Total Runs
-build-main,"{43.1,44.5,45.9,42.9,47.8}","{success,success,success,success,failure}","{run-1230,run-1231,run-1232,run-1233,run-1234}","{https://ci.example.com/build/1230,https://ci.example.com/build/1231,https://ci.example.com/build/1232,https://ci.example.com/build/1233,https://ci.example.com/build/1234}","{1.8,1.9,2.1,2.0,1.8}","{2025-01-16T08:00:00Z,2025-01-17T08:00:00Z,2025-01-18T08:00:00Z,2025-01-19T08:00:00Z,2025-01-20T08:00:00Z}","{2025-01-16T08:00:46Z,2025-01-17T08:00:44Z,2025-01-18T08:00:47Z,2025-01-19T08:00:45Z,2025-01-20T08:00:45Z}",47.1,234
+Name,Run History (s),Outcome History,Run IDs,URLs,Queue History (s),Started Times,Completion Times,P80 Duration (s),Total Runs,Tags
+build-main,"{43.1,44.5,45.9,42.9,47.8}","{success,success,success,success,failure}","{run-1230,run-1231,run-1232,run-1233,run-1234}","{https://ci.example.com/build/1230,https://ci.example.com/build/1231,https://ci.example.com/build/1232,https://ci.example.com/build/1233,https://ci.example.com/build/1234}","{1.8,1.9,2.1,2.0,1.8}","{2025-01-16T08:00:00Z,2025-01-17T08:00:00Z,2025-01-18T08:00:00Z,2025-01-19T08:00:00Z,2025-01-20T08:00:00Z}","{2025-01-16T08:00:46Z,2025-01-17T08:00:44Z,2025-01-18T08:00:47Z,2025-01-19T08:00:45Z,2025-01-20T08:00:45Z}",47.1,234,"{""artifactId"":""my-service"",""environment"":""production"",""team"":""platform""}"
 ```
 
 The plugin will automatically extract:

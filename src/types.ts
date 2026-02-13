@@ -64,6 +64,8 @@ export interface ExecutionRow {
   Passed?: number;
   Failed?: number;
   Skipped?: number;
+  // Optional tags for complementary information (artifactId, environment, team, etc.)
+  Tags?: Record<string, string>;
 }
 
 /**

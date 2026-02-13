@@ -85,6 +85,81 @@ const sanitizeNumericArray = (arr: any[]): number[] => {
   });
 };
 
+// Helper function to parse tags field (supports JSON object, PostgreSQL HSTORE, or key=value pairs)
+const parseTags = (value: any): Record<string, string> | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  // If already an object, return it
+  if (typeof value === "object" && !Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    let stringValue = value.trim();
+
+    // Handle empty string
+    if (!stringValue) {
+      return undefined;
+    }
+
+    // Strip outer quotes if present
+    if (
+      (stringValue.startsWith('"') && stringValue.endsWith('"')) ||
+      (stringValue.startsWith("'") && stringValue.endsWith("'"))
+    ) {
+      stringValue = stringValue.slice(1, -1);
+    }
+
+    // Try JSON format first: {"key":"value", "key2":"value2"}
+    if (stringValue.startsWith("{") && stringValue.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(stringValue);
+        return typeof parsed === "object" && !Array.isArray(parsed) ? parsed : undefined;
+      } catch {
+        // If JSON parsing fails, try PostgreSQL HSTORE format: key=>value, key2=>value2
+        try {
+          const result: Record<string, string> = {};
+          const content = stringValue.slice(1, -1);
+          const pairs = content.split(",").map((p) => p.trim());
+          for (const pair of pairs) {
+            const parts = pair.split("=>").map((p) => p.trim());
+            if (parts.length === 2) {
+              // Remove quotes from key and value if present
+              const key = parts[0].replace(/^["']|["']$/g, "");
+              const val = parts[1].replace(/^["']|["']$/g, "");
+              result[key] = val;
+            }
+          }
+          return Object.keys(result).length > 0 ? result : undefined;
+        } catch {
+          return undefined;
+        }
+      }
+    }
+
+    // Try key=value format: key=value,key2=value2
+    if (stringValue.includes("=")) {
+      try {
+        const result: Record<string, string> = {};
+        const pairs = stringValue.split(",").map((p) => p.trim());
+        for (const pair of pairs) {
+          const [key, val] = pair.split("=").map((p) => p.trim());
+          if (key && val) {
+            result[key] = val.replace(/^["']|["']$/g, "");
+          }
+        }
+        return Object.keys(result).length > 0 ? result : undefined;
+      } catch {
+        return undefined;
+      }
+    }
+  }
+
+  return undefined;
+};
+
 export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
   data,
   options,
@@ -135,6 +210,7 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
     const passedField = findField("Passed");
     const failedField = findField("Failed");
     const skippedField = findField("Skipped");
+    const tagsField = findField("Tags");
 
     if (!nameField || !runHistoryField) {
       return [];
@@ -190,6 +266,7 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
         Passed: passedField?.values[i] ? parseInt(passedField.values[i], 10) : undefined,
         Failed: failedField?.values[i] ? parseInt(failedField.values[i], 10) : undefined,
         Skipped: skippedField?.values[i] ? parseInt(skippedField.values[i], 10) : undefined,
+        Tags: tagsField?.values[i] ? parseTags(tagsField.values[i]) : undefined,
       });
     }
 
@@ -285,6 +362,7 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
   }, [sortedRows]);
 
   const hasTestBreakdown = sortedRows.some((r) => r.Passed !== undefined);
+  const hasTags = sortedRows.some((r) => r.Tags !== undefined);
 
   const renderSortIcon = (column: SortColumn) => {
     if (sortBy !== column) {
@@ -477,6 +555,18 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
                 </th>
               </>
             )}
+            {hasTags && (
+              <th
+                style={{
+                  padding: "12px 8px",
+                  textAlign: "left",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Tags
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -569,6 +659,32 @@ export const ExecutionTable: React.FC<PanelProps<ExecutionTableOptions>> = ({
                   <td style={{ padding: "8px", textAlign: "center" }}>{row.Failed || 0}</td>
                   <td style={{ padding: "8px", textAlign: "center" }}>{row.Skipped || 0}</td>
                 </>
+              )}
+              {hasTags && (
+                <td style={{ padding: "8px" }}>
+                  {row.Tags && Object.keys(row.Tags).length > 0 ? (
+                    <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                      {Object.entries(row.Tags).map(([key, value]) => (
+                        <span
+                          key={key}
+                          style={{
+                            padding: "2px 8px",
+                            borderRadius: "4px",
+                            background: theme.colors.background.secondary,
+                            border: `1px solid ${theme.colors.border.weak}`,
+                            fontSize: "0.85em",
+                            whiteSpace: "nowrap",
+                          }}
+                          title={`${key}: ${value}`}
+                        >
+                          <strong>{key}:</strong> {value}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    "-"
+                  )}
+                </td>
               )}
             </tr>
           ))}

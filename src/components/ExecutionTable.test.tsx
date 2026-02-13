@@ -494,4 +494,204 @@ describe("ExecutionTable", () => {
 
     expect(screen.getByText("build-sql-nulls")).toBeInTheDocument();
   });
+
+  it("should display Tags column when tags data exists", () => {
+    const props = createMockPanelProps([
+      {
+        name: "Name",
+        type: FieldType.string,
+        values: ["build-main", "test-suite"],
+      },
+      {
+        name: "Run History (s)",
+        type: FieldType.other,
+        values: [
+          [45.2, 43.1],
+          [123.4, 118.7],
+        ],
+      },
+      {
+        name: "Outcome History",
+        type: FieldType.other,
+        values: [
+          ["success", "success"],
+          ["failure", "success"],
+        ],
+      },
+      {
+        name: "Run IDs",
+        type: FieldType.other,
+        values: [
+          ["run-1", "run-2"],
+          ["test-1", "test-2"],
+        ],
+      },
+      {
+        name: "URLs",
+        type: FieldType.other,
+        values: [
+          ["http://example.com/1", "http://example.com/2"],
+          ["http://example.com/t1", "http://example.com/t2"],
+        ],
+      },
+      {
+        name: "Last Outcome",
+        type: FieldType.string,
+        values: ["success", "failure"],
+      },
+      {
+        name: "Last Duration (s)",
+        type: FieldType.number,
+        values: [45.2, 123.4],
+      },
+      {
+        name: "P80 Duration (s)",
+        type: FieldType.number,
+        values: [47.1, 125.0],
+      },
+      {
+        name: "Total Runs",
+        type: FieldType.number,
+        values: [234, 189],
+      },
+      {
+        name: "Tags",
+        type: FieldType.other,
+        values: [
+          '{"artifactId":"my-service","environment":"production"}',
+          '{"team":"platform","region":"us-east-1"}',
+        ],
+      },
+    ]);
+
+    render(<ExecutionTable {...props} />);
+
+    expect(screen.getByText("Tags")).toBeInTheDocument();
+    expect(screen.getByText("my-service")).toBeInTheDocument();
+    expect(screen.getByText("production")).toBeInTheDocument();
+    expect(screen.getByText("platform")).toBeInTheDocument();
+    expect(screen.getByText("us-east-1")).toBeInTheDocument();
+  });
+
+  it("should parse Tags in PostgreSQL HSTORE format", () => {
+    const props = createMockPanelProps([
+      {
+        name: "Name",
+        type: FieldType.string,
+        values: ["build-main"],
+      },
+      {
+        name: "Run History (s)",
+        type: FieldType.other,
+        values: [[45.2, 43.1]],
+      },
+      {
+        name: "Outcome History",
+        type: FieldType.other,
+        values: [["success", "success"]],
+      },
+      {
+        name: "Run IDs",
+        type: FieldType.other,
+        values: [["run-1", "run-2"]],
+      },
+      {
+        name: "URLs",
+        type: FieldType.other,
+        values: [["http://example.com/1", "http://example.com/2"]],
+      },
+      {
+        name: "Last Outcome",
+        type: FieldType.string,
+        values: ["success"],
+      },
+      {
+        name: "Last Duration (s)",
+        type: FieldType.number,
+        values: [45.2],
+      },
+      {
+        name: "P80 Duration (s)",
+        type: FieldType.number,
+        values: [47.1],
+      },
+      {
+        name: "Total Runs",
+        type: FieldType.number,
+        values: [234],
+      },
+      {
+        name: "Tags",
+        type: FieldType.other,
+        values: ['{artifactId=>my-service, environment=>production}'],
+      },
+    ]);
+
+    render(<ExecutionTable {...props} />);
+
+    expect(screen.getByText("Tags")).toBeInTheDocument();
+    expect(screen.getByText("my-service")).toBeInTheDocument();
+    expect(screen.getByText("production")).toBeInTheDocument();
+  });
+
+  it("should parse Tags in key=value format", () => {
+    const props = createMockPanelProps([
+      {
+        name: "Name",
+        type: FieldType.string,
+        values: ["build-main"],
+      },
+      {
+        name: "Run History (s)",
+        type: FieldType.other,
+        values: [[45.2, 43.1]],
+      },
+      {
+        name: "Outcome History",
+        type: FieldType.other,
+        values: [["success", "success"]],
+      },
+      {
+        name: "Run IDs",
+        type: FieldType.other,
+        values: [["run-1", "run-2"]],
+      },
+      {
+        name: "URLs",
+        type: FieldType.other,
+        values: [["http://example.com/1", "http://example.com/2"]],
+      },
+      {
+        name: "Last Outcome",
+        type: FieldType.string,
+        values: ["success"],
+      },
+      {
+        name: "Last Duration (s)",
+        type: FieldType.number,
+        values: [45.2],
+      },
+      {
+        name: "P80 Duration (s)",
+        type: FieldType.number,
+        values: [47.1],
+      },
+      {
+        name: "Total Runs",
+        type: FieldType.number,
+        values: [234],
+      },
+      {
+        name: "Tags",
+        type: FieldType.other,
+        values: ['artifactId=my-service,environment=production'],
+      },
+    ]);
+
+    render(<ExecutionTable {...props} />);
+
+    expect(screen.getByText("Tags")).toBeInTheDocument();
+    expect(screen.getByText("my-service")).toBeInTheDocument();
+    expect(screen.getByText("production")).toBeInTheDocument();
+  });
 });
