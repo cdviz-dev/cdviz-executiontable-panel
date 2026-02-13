@@ -23,9 +23,12 @@ description = "lint code with eslint"
 run = "yarn run lint"
 wait_for = ["install:deps"]
 
-[tasks."lint:fix"]
+[tasks."autofix"]
 description = "fix lint issues and format code"
-run = "yarn run lint:fix"
+run = [
+  "yarn run lint:fix",
+  { task = "format" },
+]
 wait_for = ["install:deps"]
 
 [tasks.check]
