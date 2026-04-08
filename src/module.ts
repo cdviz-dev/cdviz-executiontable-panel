@@ -67,10 +67,12 @@ export const plugin = new PanelPlugin<ExecutionTableOptions>(ExecutionTable).set
         path: "defaultSortColumn",
         name: "Default sort column",
         description: "Column to sort by when the panel loads",
-        defaultValue: "Name",
+        defaultValue: "Completion Time",
         settings: {
           options: [
             { value: "Name", label: "Name" },
+            { value: "Completion Time", label: "History (Last Completion Time)" },
+            { value: "Started Time", label: "Started Time (Last)" },
             { value: "Last Duration (s)", label: "Last Duration" },
             { value: "Last Queue (s)", label: "Last Queue" },
             { value: "P80 Duration (s)", label: "P80 Duration" },
@@ -78,8 +80,6 @@ export const plugin = new PanelPlugin<ExecutionTableOptions>(ExecutionTable).set
             { value: "Passed", label: "Passed" },
             { value: "Failed", label: "Failed" },
             { value: "Skipped", label: "Skipped" },
-            { value: "Completion Time", label: "Completion Time (Last)" },
-            { value: "Started Time", label: "Started Time (Last)" },
           ],
         },
       })
@@ -87,7 +87,7 @@ export const plugin = new PanelPlugin<ExecutionTableOptions>(ExecutionTable).set
         path: "defaultSortDirection",
         name: "Default sort direction",
         description: "Sort direction when the panel loads",
-        defaultValue: "asc",
+        defaultValue: "desc",
         settings: {
           options: [
             { value: "asc", label: "Ascending" },
