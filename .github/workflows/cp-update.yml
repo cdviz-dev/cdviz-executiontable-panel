@@ -11,10 +11,16 @@ on:
 # `workflows: read and write`
 
 jobs:
-  release:
+  createplugin-update:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.INTBOT_APP_ID }}
+          private-key: ${{ secrets.INTBOT_PRIVATE_KEY }}
+
       - uses: grafana/plugin-actions/create-plugin-update@create-plugin-update/v2.0.1
         with:
-          # Make sure to save the token in your repository secrets as `GH_PAT_TOKEN`
-          token: ${{ secrets.GH_PAT_TOKEN }}
+          token: ${{ steps.generate_token.outputs.token }}
