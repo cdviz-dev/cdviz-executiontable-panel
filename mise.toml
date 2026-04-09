@@ -2,9 +2,13 @@
 "yarn" = "latest"
 "dprint" = "latest"
 
-[tasks."update-plugin"]
+[tasks."update:plugin"]
 description = "update the plugin project against template, https://grafana.com/developers/plugin-tools/how-to-guides/updating-a-plugin"
 run = "yarn dlx @grafana/create-plugin@latest update"
+
+[tasks."update:deps"]
+description = "update the plugin project against template, https://grafana.com/developers/plugin-tools/how-to-guides/updating-a-plugin"
+run = "yarn upgrade-interactive"
 
 [tasks."install:deps"]
 description = "install npm dependencies"
