@@ -150,6 +150,14 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
     setTooltipPos(null);
   };
 
+  const isAbsoluteUrl = (s: string) => {
+    try {
+      return !!s && ["http:", "https:"].includes(new URL(s).protocol);
+    } catch {
+      return false;
+    }
+  };
+
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) {
@@ -160,8 +168,11 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
     const x = e.clientX - rect.left;
     const index = Math.floor(x / (barWidth + barGap));
 
-    if (index >= 0 && index < barCount && urls[index]) {
-      window.open(urls[index], "_blank");
+    if (index >= 0 && index < barCount) {
+      const href = isAbsoluteUrl(urls[index]) ? urls[index] : isAbsoluteUrl(runIds[index]) ? runIds[index] : null;
+      if (href) {
+        window.open(href, "_blank");
+      }
     }
   };
 
@@ -214,6 +225,7 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
           const i = hoveredIndex;
           const startedTime = startedTimes[i];
           const completionTime = completionTimes[i];
+          const hasClickableUrl = isAbsoluteUrl(urls[i]) || isAbsoluteUrl(runIds[i]);
           const queueDuration = queueDurations?.[i];
 
           return (
@@ -258,11 +270,13 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
                   <strong>Completed:</strong> {formatDateTime(completionTime)}
                 </div>
               )}
-              <div
-                style={{ marginTop: "4px", fontSize: "0.85em", color: theme.colors.text.secondary }}
-              >
-                Click to open details
-              </div>
+              {hasClickableUrl && (
+                <div
+                  style={{ marginTop: "4px", fontSize: "0.85em", color: theme.colors.text.secondary }}
+                >
+                  Click to open details
+                </div>
+              )}
             </div>
           );
         })()
