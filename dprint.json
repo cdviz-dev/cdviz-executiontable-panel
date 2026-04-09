@@ -31,12 +31,7 @@
     "printWidth": 100,
     "useTabs": false
   },
-  "excludes": [
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/*.off",
-    "videos-src/**"
-  ],
+  "excludes": ["**/node_modules/**", "**/dist/**", "**/*.off", "videos-src/**"],
   "plugins": [
     "https://plugins.dprint.dev/biome-0.9.3.wasm",
     "https://plugins.dprint.dev/json-0.20.0.wasm",

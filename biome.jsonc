@@ -6,10 +6,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": [
-      "src/**/*.{ts,tsx,js,jsx,json,md,mdx,html,css,scss,vue,yml,yaml,jsonc}",
-      "!build",
-    ],
+    "includes": ["src/**/*.{ts,tsx,js,jsx,json,md,mdx,html,css,scss,vue,yml,yaml,jsonc}", "!build"],
   },
   "formatter": {
     "enabled": true,

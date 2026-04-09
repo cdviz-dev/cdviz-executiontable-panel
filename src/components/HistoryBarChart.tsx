@@ -69,12 +69,16 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     // Minimum bar height equivalent to 3s at the current scale (avoids invisible bars)
-    const minRunH = maxValue > 0 ? Math.min((3 / maxValue) * runSectionHeight, runSectionHeight) : 0;
+    const minRunH =
+      maxValue > 0 ? Math.min((3 / maxValue) * runSectionHeight, runSectionHeight) : 0;
 
     // Draw run bars (growing upward from baseline)
     durations.forEach((duration, index) => {
       const x = index * (barWidth + barGap);
-      const scaledH = maxValue > 0 ? Math.max((duration / maxValue) * runSectionHeight, duration > 0 ? minRunH : 0) : 0;
+      const scaledH =
+        maxValue > 0
+          ? Math.max((duration / maxValue) * runSectionHeight, duration > 0 ? minRunH : 0)
+          : 0;
       const y = baseline - scaledH;
 
       ctx.fillStyle = getOutcomeColor(outcomes[index]);
@@ -169,7 +173,11 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
     const index = Math.floor(x / (barWidth + barGap));
 
     if (index >= 0 && index < barCount) {
-      const href = isAbsoluteUrl(urls[index]) ? urls[index] : isAbsoluteUrl(runIds[index]) ? runIds[index] : null;
+      const href = isAbsoluteUrl(urls[index])
+        ? urls[index]
+        : isAbsoluteUrl(runIds[index])
+          ? runIds[index]
+          : null;
       if (href) {
         window.open(href, "_blank");
       }
@@ -272,7 +280,11 @@ export const HistoryBarChart: React.FC<HistoryBarChartProps> = ({
               )}
               {hasClickableUrl && (
                 <div
-                  style={{ marginTop: "4px", fontSize: "0.85em", color: theme.colors.text.secondary }}
+                  style={{
+                    marginTop: "4px",
+                    fontSize: "0.85em",
+                    color: theme.colors.text.secondary,
+                  }}
                 >
                   Click to open details
                 </div>
